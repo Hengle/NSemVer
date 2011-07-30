@@ -1,0 +1,10 @@
+syntax: glob
+*\bin\*
+*\obj\*
+Libs\*
+*.suo
+*.user
+_ReSharper*\*
+*.log
+*.dotCover
+Backup\*
