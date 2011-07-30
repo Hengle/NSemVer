@@ -1,4 +1,4 @@
-﻿namespace NSemVer
+﻿namespace NSemVer.Visitors
 {
 	using System.Collections.Generic;
 

@@ -1,4 +1,4 @@
-﻿namespace NSemVer
+﻿namespace NSemVer.Visitors
 {
 	public interface IChangeVisitor
 	{
