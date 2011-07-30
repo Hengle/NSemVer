@@ -2,6 +2,8 @@
 {
 	public interface IChangeVisitor
 	{
+		void Visit(AssemblyChanges change);
+
 		void Visit(ModuleChange change);
 
 		void Visit(TypeChange change);

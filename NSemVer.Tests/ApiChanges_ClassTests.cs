@@ -2,7 +2,7 @@ namespace NSemVer.Tests
 {
 	using NUnit.Framework;
 
-	public class ClassTests : ApiChangeTestBase
+	public class ApiChanges_ClassTests : ApiChangeTestBase
 	{
 		[Test]
 		public void PublicClassMovingNamespace()
@@ -20,7 +20,7 @@ namespace NSemVer.Tests
 				}";
 
 			GivenContext(PreviousCode, CurrentCode)
-				.When(CheckingPublicApiChanges)
+				.When(ApiChangesDetermined)
 				.Then(HasTypeChange, ChangeType.Removed, "Namespace1.Class1")
 				.And(HasTypeChange, ChangeType.Added, "Namespace2.Class1")
 				.ExecuteWithReport();

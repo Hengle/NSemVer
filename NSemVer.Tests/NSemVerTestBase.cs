@@ -29,6 +29,8 @@ namespace NSemVer.Tests
 
 		protected string NewAssemblyPath { get; private set; }
 
+		protected AssemblyChanges AssemblyChanges { get; private set; }
+
 		protected void OldAssemblyWith(string source)
 		{
 			OldAssemblyPath = CompileAssembly(Path.Combine(OldAssemblyDir, "TestAssembly.dll"), source);
@@ -45,12 +47,23 @@ namespace NSemVer.Tests
 			return method.Name;
 		}
 
-		protected Condition GivenContext(string previousCode, string currentCode)
+		protected virtual Condition GivenContext(string previousCode, string currentCode)
 		{
 			return Fixture
 				.WithScenario(GenerateScenarioName(MethodBase.GetCurrentMethod()))
 				.Given(OldAssemblyWith, previousCode)
 				.And(NewAssemblyWith, currentCode);
+		}
+
+		protected void ApiChangesDetermined()
+		{
+			using (var assembly1Stream = File.Open(OldAssemblyPath, FileMode.Open))
+			using (var assembly2Stream = File.Open(NewAssemblyPath, FileMode.Open))
+			{
+				var changeBuilder = new ChangeBuilder();
+
+				AssemblyChanges = changeBuilder.GetChanges(assembly1Stream, assembly2Stream);
+			}
 		}
 
 		private static string CompileAssembly(string fileName, string source)

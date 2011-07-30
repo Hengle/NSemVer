@@ -26,7 +26,7 @@ namespace NSemVer.Tests
 				}";
 
 			GivenContext(PreviousCode, CurrentCode)
-				.When(CheckingPublicApiChanges)
+				.When(ApiChangesDetermined)
 				.Then(HasParameterChange, ChangeType.Removed, "param1")
 				.ExecuteWithReport();
 		}
@@ -53,7 +53,7 @@ namespace NSemVer.Tests
 				}";
 
 			GivenContext(PreviousCode, CurrentCode)
-				.When(CheckingPublicApiChanges)
+				.When(ApiChangesDetermined)
 				.Then(HasParameterChange, ChangeType.Added, "param1")
 				.ExecuteWithReport();
 		}
@@ -80,7 +80,7 @@ namespace NSemVer.Tests
 				}";
 
 			GivenContext(PreviousCode, CurrentCode)
-				.When(CheckingPublicApiChanges)
+				.When(ApiChangesDetermined)
 				.And(HasParameterChange, ChangeType.Added, "param1")
 				.And(HasParameterChange, ChangeType.Added, "param2")
 				.ExecuteWithReport();
@@ -108,7 +108,7 @@ namespace NSemVer.Tests
 				}";
 
 			GivenContext(PreviousCode, CurrentCode)
-				.When(CheckingPublicApiChanges)
+				.When(ApiChangesDetermined)
 				.Then(HasParameterChange, ChangeType.Removed, "param1")
 				.And(HasParameterChange, ChangeType.Added, "param2")
 				.ExecuteWithReport();

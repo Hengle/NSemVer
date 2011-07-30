@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChangeBuilderExtensions.cs" />
+    <Compile Include="Visitors\BreakingChangeResult.cs" />
     <Compile Include="Visitors\BreakingChangeVisitor.cs" />
     <Compile Include="Visitors\IChangeVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

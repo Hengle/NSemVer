@@ -1,22 +1,30 @@
 ﻿namespace NSemVer.Visitors
 {
-	using System.Collections.Generic;
-
 	public static class VisitorExtensions
 	{
-		public static void Visit(this AssemblyChanges assemblyChanges, IChangeVisitor changeVisitor)
+		public static void Visit(this AssemblyChanges assemblyChanges, IChangeVisitor visitor)
 		{
-			assemblyChanges.ModuleChanges.Visit(changeVisitor);
-		}
+			visitor.Visit(assemblyChanges);
 
-		public static void Visit(this IEnumerable<ModuleChange> changes, IChangeVisitor changeVisitor)
-		{
+			foreach (var moduleChange in assemblyChanges.ModuleChanges)
+			{
+				visitor.Visit(moduleChange);
 
-		}
+				foreach (var typeChange in moduleChange.TypeChanges)
+				{
+					visitor.Visit(typeChange);
 
-		public static void Visit(this IEnumerable<ParameterChange> changes, IChangeVisitor changeVisitor)
-		{
+					foreach (var methodChange in typeChange.MethodChanges)
+					{
+						visitor.Visit(methodChange);
 
+						foreach (var parameterChange in methodChange.ParameterChanges)
+						{
+							visitor.Visit(parameterChange);
+						}
+					}
+				}
+			}
 		}
 	}
 }

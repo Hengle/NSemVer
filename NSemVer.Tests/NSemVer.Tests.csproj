@@ -71,10 +71,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiChangeTestBase.cs" />
-    <Compile Include="ClassTests.cs" />
+    <Compile Include="ApiChanges_ClassTests.cs" />
     <Compile Include="ParameterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NSemVerTestBase.cs" />
+    <Compile Include="Visitors\BreakingChangeVisitor_ClassTests.cs" />
+    <Compile Include="Visitors\BreakingChangeVisitorTestsBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NSemVer.Core\NSemVer.Core.fsproj">
@@ -89,9 +91,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Visitors\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

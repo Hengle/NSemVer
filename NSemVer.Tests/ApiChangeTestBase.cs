@@ -1,24 +1,10 @@
 ﻿namespace NSemVer.Tests
 {
-	using System.IO;
 	using System.Linq;
 	using NUnit.Framework;
 
 	public abstract class ApiChangeTestBase : NSemVerTestBase
 	{
-		protected AssemblyChanges AssemblyChanges { get; private set; }
-
-		protected void CheckingPublicApiChanges()
-		{
-			using (var assembly1Stream = File.Open(OldAssemblyPath, FileMode.Open))
-			using (var assembly2Stream = File.Open(NewAssemblyPath, FileMode.Open))
-			{
-				var changeBuilder = new ChangeBuilder();
-
-				AssemblyChanges = changeBuilder.GetChanges(assembly1Stream, assembly2Stream);
-			}
-		}
-
 		protected void HasTypeChange(ChangeType changeType, string namespaceQualifiedTypeName)
 		{
 			var matchCount = AssemblyChanges.ModuleChanges
