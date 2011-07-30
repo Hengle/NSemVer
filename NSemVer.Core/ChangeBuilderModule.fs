@@ -4,17 +4,17 @@ open NSemVer
 open Common
 open Mono.Cecil
 
-let createFixedParameterChange (c:ChangeType) (p:ParameterDefinition) =
+let createParameterChange (c:ChangeType) (p:ParameterDefinition) =
     { Parameter = p; ChangeType = c }
 
-let createFixedMethodChange (c:ChangeType) (m:MethodDefinition) =
-    { Method = m; ChangeType = c; ParameterChanges = m.Parameters |> Seq.map (createFixedParameterChange c) }
+let createMethodChange (c:ChangeType) (m:MethodDefinition) =
+    { Method = m; ChangeType = c; ParameterChanges = m.Parameters |> Seq.map (createParameterChange c) }
 
-let createFixedTypeChange (c:ChangeType) (t:TypeDefinition) =
-    { Type = t; ChangeType = c; MethodChanges = t.Methods |> Seq.map (createFixedMethodChange c) }
+let createTypeChange (c:ChangeType) (t:TypeDefinition) =
+    { Type = t; ChangeType = c; MethodChanges = t.Methods |> Seq.map (createMethodChange c) }
 
-let createFixedModuleChange (c:ChangeType) (m:ModuleDefinition) =
-    { Module = m; ChangeType = c; TypeChanges = m.Types |> Seq.map (createFixedTypeChange c) }
+let createModuleChange (c:ChangeType) (m:ModuleDefinition) =
+    { Module = m; ChangeType = c; TypeChanges = m.Types |> Seq.map (createTypeChange c) }
 
 let calcMethodChanges (older:MethodDefinition) (newer:MethodDefinition) = 
     let paramChanges = calcChanges (older.Parameters) (newer.Parameters) (fun x y -> x.Name = y.Name (* && TODO: check default values / out / ref etc *) ) 
@@ -22,9 +22,9 @@ let calcMethodChanges (older:MethodDefinition) (newer:MethodDefinition) =
         Method = newer;
         ChangeType = ChangeType.Unchanged;
         ParameterChanges =
-            (paramChanges.Matched |> Seq.map (fun matched -> (createFixedParameterChange ChangeType.Unchanged matched.New))) 
-            |> Seq.append (paramChanges.Removed |> Seq.map (createFixedParameterChange ChangeType.Removed))
-            |> Seq.append (paramChanges.Added |> Seq.map (createFixedParameterChange ChangeType.Added))
+            (paramChanges.Matched |> Seq.map (fun matched -> (createParameterChange ChangeType.Unchanged matched.New))) 
+            |> Seq.append (paramChanges.Removed |> Seq.map (createParameterChange ChangeType.Removed))
+            |> Seq.append (paramChanges.Added |> Seq.map (createParameterChange ChangeType.Added))
     }
 
 let calcTypeChanges (older:TypeDefinition) (newer:TypeDefinition) =
@@ -39,8 +39,8 @@ let calcTypeChanges (older:TypeDefinition) (newer:TypeDefinition) =
         ChangeType = ChangeType.Unchanged;
         MethodChanges =
             (methodChanges.Matched |> Seq.map (fun matched -> (calcMethodChanges matched.Old matched.New)))
-            |> Seq.append (methodChanges.Removed |> Seq.map (createFixedMethodChange ChangeType.Removed))
-            |> Seq.append (methodChanges.Added |> Seq.map (createFixedMethodChange ChangeType.Added))
+            |> Seq.append (methodChanges.Removed |> Seq.map (createMethodChange ChangeType.Removed))
+            |> Seq.append (methodChanges.Added |> Seq.map (createMethodChange ChangeType.Added))
     }
 
 let calcModuleChanges (older:ModuleDefinition) (newer:ModuleDefinition) =
@@ -51,8 +51,8 @@ let calcModuleChanges (older:ModuleDefinition) (newer:ModuleDefinition) =
         ChangeType = ChangeType.Unchanged;
         TypeChanges =
             (typeChanges.Matched |> Seq.map (fun matched -> (calcTypeChanges matched.Old matched.New)))
-            |> Seq.append (typeChanges.Added |> Seq.map (createFixedTypeChange ChangeType.Added))
-            |> Seq.append (typeChanges.Removed |> Seq.map (createFixedTypeChange ChangeType.Removed))
+            |> Seq.append (typeChanges.Added |> Seq.map (createTypeChange ChangeType.Added))
+            |> Seq.append (typeChanges.Removed |> Seq.map (createTypeChange ChangeType.Removed))
     }
 
 let calcAssemblyChanges (older:AssemblyDefinition) (newer:AssemblyDefinition) = 
@@ -62,7 +62,7 @@ let calcAssemblyChanges (older:AssemblyDefinition) (newer:AssemblyDefinition) =
         Newer = newer;
         ModuleChanges =
             (moduleChanges.Matched |> Seq.map (fun matched -> (calcModuleChanges matched.Old matched.New)))
-            |> Seq.append (moduleChanges.Added |> Seq.map (createFixedModuleChange ChangeType.Added))
-            |> Seq.append (moduleChanges.Removed |> Seq.map (createFixedModuleChange ChangeType.Removed))
+            |> Seq.append (moduleChanges.Added |> Seq.map (createModuleChange ChangeType.Added))
+            |> Seq.append (moduleChanges.Removed |> Seq.map (createModuleChange ChangeType.Removed))
     }
 
