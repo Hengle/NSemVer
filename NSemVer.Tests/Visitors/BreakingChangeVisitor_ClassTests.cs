@@ -1,6 +1,7 @@
 namespace NSemVer.Tests.Visitors
 {
 	using NSemVer.Visitors;
+	using NSemVer.Visitors.BreakingChanges;
 	using NUnit.Framework;
 
 	public class BreakingChangeVisitor_ClassTests : BreakingChangeVisitorTestsBase
@@ -23,7 +24,7 @@ namespace NSemVer.Tests.Visitors
 			GivenContext(PreviousCode, CurrentCode)
 				.When(ApiChangesDetermined)
 				.And(BreakingChangeVisitorVisitsChanges)
-				.Then(SingleBreakingChangeReasonIs, BreakingChangeType.PublicTypeRemoved)
+				.Then(SingleBreakingChangeReasonIs, ApiBreakType.TypeRemoved)
 				.And(SingleChangeTypeIs, "Namespace1.Class1")
 				.ExecuteWithReport();
 		}

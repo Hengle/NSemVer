@@ -2,6 +2,7 @@
 {
 	using System.Linq;
 	using NSemVer.Visitors;
+	using NSemVer.Visitors.BreakingChanges;
 	using NUnit.Framework;
 	using StoryQ;
 
@@ -29,16 +30,30 @@
 			_breakingChanges = Sut.BreakingChanges.ToArray();
 		}
 
-		protected void SingleBreakingChangeReasonIs(BreakingChangeType breakingChangeType)
+		protected void NoBreakingChanges()
 		{
-			Assert.AreEqual(breakingChangeType, _breakingChanges.Single().BreakingChangeType);
+			Assert.AreEqual(0, _breakingChanges.Length);
+		}
+
+		protected void SingleBreakingChangeReasonIs(ApiBreakType breakType)
+		{
+			Assert.AreEqual(1, _breakingChanges.Length);
+			Assert.AreEqual(breakType, _breakingChanges[0].BreakType);
 		}
 
 		protected void SingleChangeTypeIs(string namespaceQualifiedTypeName)
 		{
-			var typeChange = (TypeChange)_breakingChanges.Single().Change;
+			Assert.AreEqual(1, _breakingChanges.Length);
+			var typeChange = (TypeChange)_breakingChanges[0].Change;
 
 			Assert.AreEqual(namespaceQualifiedTypeName, typeChange.Type.FullName);
+		}
+
+		protected void SingleChangeMethodIs(string namespaceQualifiedMethodName)
+		{
+			var methodChange = (MethodChange)_breakingChanges.Single().Change;
+
+			Assert.AreEqual(namespaceQualifiedMethodName, methodChange.Method.FullName);
 		}
 	}
 }
