@@ -5,7 +5,7 @@
 	using System.Linq;
 	using Mono.Cecil;
 
-	public static class Extensions
+	internal static class Extensions
 	{
 		public static bool IsPubliclyVisible(this MethodDefinition method)
 		{
