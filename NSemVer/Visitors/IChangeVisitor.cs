@@ -8,6 +8,8 @@
 
 		void Visit(TypeChange change);
 
+		void Visit(MethodGroupChange change);
+
 		void Visit(MethodChange change);
 
 		void Visit(ParameterChange change);

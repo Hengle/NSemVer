@@ -15,7 +15,7 @@ let compareItemAgainstSeq (coll:seq<'a>) (comparer:'a -> 'a -> bool) (item:'a) =
     | Some matched -> ComparisonResult.Matched(item, matched)
     | None -> ComparisonResult.Removed(item)
 
-let calcChanges oldItems newItems (comparer:'a -> 'a -> bool) = 
+let calcCollChanges oldItems newItems (comparer:'a -> 'a -> bool) = 
     // inefficient. Does for now
     let oldToNewChanges =
         oldItems
@@ -24,14 +24,3 @@ let calcChanges oldItems newItems (comparer:'a -> 'a -> bool) =
         newItems
            |> Seq.fold (fun state item -> updateCollectionChangeResult state item (compareItemAgainstSeq oldItems comparer)) { Matched=[]; Removed=[] }
     { Added=newToOldChanges.Removed; Removed=oldToNewChanges.Removed; Matched=oldToNewChanges.Matched; }
-
-(*
-let inline (?) this key =
-  ( ^a : (member Name : ^a -> string) (this,key))
-
-let inline compareByName a b =
-  ( ^a : (member Name : ^a -> string) a)  
-
-//let inline compareByName< ^a when ^a : (member Name: ^a -> string) > x =
-//     (^a: (member Name: ^a -> string) x)
-*)
