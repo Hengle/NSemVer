@@ -56,6 +56,7 @@
     <Compile Include="Visitors\BreakingChanges\BreakingChangeResult.cs" />
     <Compile Include="Visitors\BreakingChanges\ApiBreakType.cs" />
     <Compile Include="Visitors\BreakingChanges\BreakingChangeVisitor.cs" />
+    <Compile Include="Visitors\BreakingChanges\Extensions.cs" />
     <Compile Include="Visitors\IChangeVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Visitors\VisitorExtensions.cs" />
