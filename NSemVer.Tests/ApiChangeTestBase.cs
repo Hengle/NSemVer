@@ -18,6 +18,7 @@
 		{
 			var matchCount = AssemblyChanges.ModuleChanges
 				.SelectMany(x => x.TypeChanges)
+				.SelectMany(x => x.MethodGroupChanges)
 				.SelectMany(x => x.MethodChanges)
 				.SelectMany(x => x.ParameterChanges)
 				.Count(x => x.ChangeType == changeType && x.Parameter.Name == parameterName);

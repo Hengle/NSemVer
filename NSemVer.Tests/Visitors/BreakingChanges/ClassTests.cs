@@ -25,7 +25,7 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 				.When(ApiChangesDetermined)
 				.And(BreakingChangeVisitorVisitsChanges)
 				.Then(SingleBreakingChangeReasonIs, ApiBreakType.TypeRemoved)
-				.And(SingleChangeTypeIs, "Namespace1.Class1")
+				.And(SingleChangedTypeIs, "Namespace1.Class1")
 				.ExecuteWithReport();
 		}
 	}

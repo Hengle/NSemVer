@@ -10,7 +10,7 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 		{
 			private readonly string _previousCode;
 			private readonly string _currentCode;
-			private readonly string _consumerCode;
+			private readonly string _semanticallyChangedConsumerCode;
 
 			public AddingInstanceMethodTests()
 			{
@@ -33,7 +33,7 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 						}
 					}";
 
-				_consumerCode = @"
+				_semanticallyChangedConsumerCode = @"
 					namespace ApiConsumer
 					{
 						using Api;
@@ -42,6 +42,8 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 						{
 							public void Example()
 							{
+								// Compiled against V1: will call ConsumerExtensions.Baz extension method
+								// Compiled against V2: will call Foo.Baz method
 								new Foo().Baz();
 							}
 						}
@@ -65,9 +67,9 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 				GivenContext(previousCode, currentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
 					.When(ApiChangesDetermined)
 					.And(BreakingChangeVisitorVisitsChanges)
-					.Then(SingleBreakingChangeReasonIs, ApiBreakType.NewInstanceMethod)
-					.And(SingleChangeMethodIs, "System.Void Api.Foo::Baz()")
-					.And(ExampleNonBreakingButSemanticallyDifferentConsumerCodeIs, _consumerCode)
+					.Then(BreakingChangeCountIs, 1)
+					.And(BreakingMethodChangeDetected, ApiBreakType.NewInstanceMethod, "System.Void Api.Foo::Baz()")
+					.And(ExampleNonBreakingButSemanticallyDifferentConsumerCodeIs, _semanticallyChangedConsumerCode)
 					.ExecuteWithReport();
 			}
 
@@ -88,22 +90,22 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 			}
 		}
 
-		public class AddingMethodOverloadWithNewInterfaceParameterTests : BreakingChangeVisitorTestsBase
+		public class AddingMethodOverloadWithNewInterfaceBasedParameterTests : BreakingChangeVisitorTestsBase
 		{
 			private readonly string _previousCode;
 			private readonly string _currentCode;
 			private readonly string _brokenConsumerCode;
 
-			public AddingMethodOverloadWithNewInterfaceParameterTests()
+			public AddingMethodOverloadWithNewInterfaceBasedParameterTests()
 			{
 				_previousCode = @"
 					namespace Api
 					{
-						using System.Collections;
+						using System;
 
 						<class-visibility> class Foo
 						{
-							public void Bar(IEnumerable x) { }
+							public void Bar(IComparable x) { }
 						}
 					}";
 
@@ -111,12 +113,11 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 					namespace Api
 					{
 						using System;
-						using System.Collections;
 
 						<class-visibility> class Foo
 						{
-							public void Bar(IEnumerable x) { }
-							<method-visibility> void Bar(ICloneable x) { }
+							public void Bar(IComparable x) { }
+							<method-visibility> void Bar(IFormattable x) { }
 						}
 					}";
 
@@ -129,7 +130,8 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 						{
 							public void Example()
 							{
-								new Foo().Bar(new int[0]);
+								int i = 99;
+								new Foo().Bar(i); // ambiguous call - which overload to use?
 							}
 						}
 					}
@@ -145,9 +147,10 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 				GivenContext(previousCode, currentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
 					.When(ApiChangesDetermined)
 					.And(BreakingChangeVisitorVisitsChanges)
-					.Then(SingleBreakingChangeReasonIs, ApiBreakType.MethodOverloadedWithInterfaceBasedParameter)
-					.And(SingleChangeMethodIs, "System.Void Api.Foo::Bar(System.ICloneable)")
-					.And(ExampleBrokenConsumerCodeIs, _brokenConsumerCode)
+					.Then(BreakingChangeCountIs, 2)
+					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.NewInstanceMethod, "System.Void Api.Foo::Bar(System.IFormattable)")
+					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.MethodOverloadedWithInterfaceBasedParameter, "System.Void Api.Foo::Bar(System.IFormattable)")
+					.And(ExampleBrokenConsumerCodeIs, _brokenConsumerCode, "error CS0121: The call is ambiguous")
 					.ExecuteWithReport();
 			}
 
@@ -167,48 +170,5 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 					.ExecuteWithReport();
 			}
 		}
-
-		/*
-		[TestCase("public", ChangeType.Breaking)]
-		[TestCase("internal", ChangeType.NonBreaking)]
-		public void AddingMethodOverload(string visibility, ChangeType changeType)
-		{
-			string PreviousCode = @"
-				namespace Tests
-				{
-					using System;
-					using System.Collections;
-
-					<visibility> class Foo
-					{
-						public void Bar(IEnumerable x) { }
-					}
-				}"
-				.Replace("<visibility>", visibility);
-
-			string CurrentCode = @"
-				namespace Tests
-				{
-					using System;
-					using System.Collections;
-
-					<visibility> class Foo
-					{
-						public void Bar(IEnumerable x) { }
-						public void Bar(ICloneable x) { }
-					}
-				}"
-				.Replace("<visibility>", visibility);
-
-			Fixture
-				.WithScenario(GenerateScenarioName(MethodBase.GetCurrentMethod()))
-				.Given(OldAssemblyWith, PreviousCode)
-				.And(NewAssemblyWith, CurrentCode)
-				.When(CheckingForPublicApiChanges)
-				.Then(Considered, changeType)
-				.ExecuteWithReport();
-		}
-
-		 * */
 	}
 }

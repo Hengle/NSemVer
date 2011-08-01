@@ -8,6 +8,7 @@
 	public class BreakingChangeVisitor : IChangeVisitor
 	{
 		private readonly IDictionary<ApiBreakType, Func<TypeChange, bool>> _breakingTypeChangeFuncs = CreateBreakingTypeChanges();
+		private readonly IDictionary<ApiBreakType, Func<MethodGroupChange, bool>> _breakingMethodGroupChangeFuncs = CreateBreakingMethodGroupChanges();
 		private readonly IDictionary<ApiBreakType, Func<MethodChange, bool>> _breakingMethodChangeFuncs = CreateBreakingMethodChanges();
 		private readonly IDictionary<ApiBreakType, Func<ParameterChange, bool>> _breakingParameterChangeFuncs = CreateBreakingParameterChangeChanges();
 
@@ -31,6 +32,11 @@
 			Visit(_breakingTypeChangeFuncs, change);
 		}
 
+		public void Visit(MethodGroupChange change)
+		{
+			Visit(_breakingMethodGroupChangeFuncs, change);
+		}
+
 		public void Visit(MethodChange change)
 		{
 			Visit(_breakingMethodChangeFuncs, change);
@@ -49,23 +55,31 @@
 			};
 		}
 
+		private static IDictionary<ApiBreakType, Func<MethodGroupChange, bool>> CreateBreakingMethodGroupChanges()
+		{
+			return new Dictionary<ApiBreakType, Func<MethodGroupChange, bool>>
+			{
+				{
+					ApiBreakType.NewInstanceMethod,
+					methodGroupChange => methodGroupChange.GetAllNewMethodChanges().Any(methodChange => methodChange.IsPubliclyVisible())
+				},
+
+				{
+				    ApiBreakType.MethodOverloadedWithInterfaceBasedParameter,
+				    methodGroupChange => methodGroupChange.ChangeType == ChangeType.Matched && 
+				                         methodGroupChange.MethodChanges.Any(methodChange => 
+											methodChange.ChangeType == ChangeType.Added &&
+				                            methodChange.IsPubliclyVisible() &&
+											methodChange.GetNewParameters(methodGroupChange).Any(x => x.ParameterType.Resolve().IsInterface)
+				                         )
+				},
+			};
+		}
+
 		private static IDictionary<ApiBreakType, Func<MethodChange, bool>> CreateBreakingMethodChanges()
 		{
 			return new Dictionary<ApiBreakType, Func<MethodChange, bool>>
 			{
-				{
-					ApiBreakType.NewInstanceMethod,
-					methodChange => methodChange.IsPubliclyVisible() &&
-									methodChange.ChangeType == ChangeType.Added &&
-									!methodChange.IsMethodOverload()
-				},
-				/*{
-					ApiBreakType.MethodOverloadedWithInterfaceBasedParameter,
-					methodChange => methodChange.IsPubliclyVisible() &&
-									methodChange.ChangeType == ChangeType.Added &&
-									methodChange.IsMethodOverload() &&
-									methodChange.OverloadedParametersContains(p => p.ParameterType.IsInterface)
-				},*/
 			};
 		}
 
@@ -73,7 +87,6 @@
 		{
 			return new Dictionary<ApiBreakType, Func<ParameterChange, bool>>
 			{
-				// { BreakingChangeType.PublicTypeRemoved, change => change.ChangeType == ChangeType.Removed && change.Type.IsPublic },
 			};
 		}
 
@@ -97,11 +110,50 @@
 			return change.Method.IsPublic && change.Method.DeclaringType.IsPublic;
 		}
 
-		public static bool IsMethodOverload(this MethodChange methodChange)
+		public static IEnumerable<MethodChange> GetAllNewMethodChanges(this MethodGroupChange methodGroupChange)
 		{
-			return methodChange.Method.DeclaringType.Methods
-				.Where(x => x.IsPublic)
-				.Any(x => x.Name == methodChange.Method.Name);
+			return methodGroupChange.ChangeType == ChangeType.Added
+			        ? methodGroupChange.MethodChanges
+			        : methodGroupChange.ChangeType == ChangeType.Matched
+			         	? methodGroupChange.MethodChanges.Where(x => x.ChangeType == ChangeType.Added)
+			         	: new MethodChange[0];
+		}
+
+		public static IEnumerable<ParameterDefinition> GetNewParameters(this MethodChange methodChange, MethodGroupChange methodGroupChange)
+		{
+			Tuple<MethodDefinition, ParameterDefinition[]>[] newParametersByOriginalMethod = methodChange.Method.GetNewParametersByOriginalMethod(methodGroupChange);
+
+			return newParametersByOriginalMethod
+				.SelectMany(x => x.Item2)
+				.Distinct(new ParameterDefinitionComparer());
+		}
+
+		public static Tuple<MethodDefinition, ParameterDefinition[]>[] GetNewParametersByOriginalMethod(this MethodDefinition method, MethodGroupChange methodGroupChange)
+		{
+			var existingMethods = methodGroupChange.MethodChanges
+				.Where(x => x.ChangeType == ChangeType.Matched) // Only select methods that are still matched (I.e. that haven't been removed)
+				.Select(x => x.Method);
+
+			var methodParameterSet = new HashSet<ParameterDefinition>(method.Parameters);
+
+			return existingMethods
+				.Select(existingMethod => Tuple.Create(
+					existingMethod,
+					methodParameterSet.Except(new HashSet<ParameterDefinition>(existingMethod.Parameters), new ParameterDefinitionComparer()).ToArray()))
+				.ToArray();
+		}
+
+		private class ParameterDefinitionComparer : IEqualityComparer<ParameterDefinition>
+		{
+			public bool Equals(ParameterDefinition x, ParameterDefinition y)
+			{
+				return x.ParameterType.FullName == y.ParameterType.FullName;
+			}
+
+			public int GetHashCode(ParameterDefinition obj)
+			{
+				return obj.ParameterType.FullName.GetHashCode();
+			}
 		}
 
 		/*
