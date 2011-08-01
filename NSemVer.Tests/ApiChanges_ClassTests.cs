@@ -1,5 +1,6 @@
 namespace NSemVer.Tests
 {
+	using System.Reflection;
 	using NUnit.Framework;
 
 	public class ApiChanges_ClassTests : ApiChangeTestBase
@@ -19,7 +20,7 @@ namespace NSemVer.Tests
 					public class Class1 { }
 				}";
 
-			GivenContext(PreviousCode, CurrentCode)
+			GivenContext(PreviousCode, CurrentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
 				.When(ApiChangesDetermined)
 				.Then(HasTypeChange, ChangeType.Removed, "Namespace1.Class1")
 				.And(HasTypeChange, ChangeType.Added, "Namespace2.Class1")

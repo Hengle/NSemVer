@@ -2,6 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
+	using Mono.Cecil;
 
 	public class BreakingChangeVisitor : IChangeVisitor
 	{
@@ -51,7 +53,19 @@
 		{
 			return new Dictionary<ApiBreakType, Func<MethodChange, bool>>
 			{
-				{ ApiBreakType.NewInstanceMethod, change => change.Method.IsPublic && change.Method.DeclaringType.IsPublic && change.ChangeType == ChangeType.Added },
+				{
+					ApiBreakType.NewInstanceMethod,
+					methodChange => methodChange.IsPubliclyVisible() &&
+									methodChange.ChangeType == ChangeType.Added &&
+									!methodChange.IsMethodOverload()
+				},
+				/*{
+					ApiBreakType.MethodOverloadedWithInterfaceBasedParameter,
+					methodChange => methodChange.IsPubliclyVisible() &&
+									methodChange.ChangeType == ChangeType.Added &&
+									methodChange.IsMethodOverload() &&
+									methodChange.OverloadedParametersContains(p => p.ParameterType.IsInterface)
+				},*/
 			};
 		}
 
@@ -73,5 +87,32 @@
 				}
 			}
 		}
+	}
+
+	// I wish there was a way to declare private extension classes :(
+	public static class Extensions
+	{
+		public static bool IsPubliclyVisible(this MethodChange change)
+		{
+			return change.Method.IsPublic && change.Method.DeclaringType.IsPublic;
+		}
+
+		public static bool IsMethodOverload(this MethodChange methodChange)
+		{
+			return methodChange.Method.DeclaringType.Methods
+				.Where(x => x.IsPublic)
+				.Any(x => x.Name == methodChange.Method.Name);
+		}
+
+		/*
+		public static bool OverloadedParametersContains(this MethodChange methodChange, Func<ParameterReference, bool> predicate)
+		{
+
+			var newParameters = methodChange.Method.Parameters
+
+			//return methodChange.Method.DeclaringType.Methods
+			//    .Where(x => x.IsPublic)
+			//    .Any(x => x.Name == methodChange.Method.Parameters.First().ParameterType.);
+		}*/
 	}
 }

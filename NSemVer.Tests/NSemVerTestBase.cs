@@ -33,12 +33,12 @@ namespace NSemVer.Tests
 
 		protected void OldAssemblyWith(string source)
 		{
-			OldAssemblyPath = CompileAssembly(Path.Combine(OldAssemblyDir, "TestAssembly.dll"), source);
+			OldAssemblyPath = CompileAssemblyAssertNoErrors(Path.Combine(OldAssemblyDir, "TestAssembly.dll"), source);
 		}
 
 		protected void NewAssemblyWith(string source)
 		{
-			NewAssemblyPath = CompileAssembly(Path.Combine(NewAssemblyDir, "TestAssembly.dll"), source);
+			NewAssemblyPath = CompileAssemblyAssertNoErrors(Path.Combine(NewAssemblyDir, "TestAssembly.dll"), source);
 		}
 
 		protected string GenerateScenarioName(MethodBase method)
@@ -47,10 +47,10 @@ namespace NSemVer.Tests
 			return method.Name;
 		}
 
-		protected virtual Condition GivenContext(string previousCode, string currentCode)
+		protected virtual Condition GivenContext(string previousCode, string currentCode, string scenarioName)
 		{
 			return Fixture
-				.WithScenario(GenerateScenarioName(MethodBase.GetCurrentMethod()))
+				.WithScenario(scenarioName)
 				.Given(OldAssemblyWith, previousCode)
 				.And(NewAssemblyWith, currentCode);
 		}
@@ -66,23 +66,47 @@ namespace NSemVer.Tests
 			}
 		}
 
-		private static string CompileAssembly(string fileName, string source)
+		protected Tuple<CompilerResults, string> CompileAssembly(string outputAssemblyFileName, string source, params string[] referencedAssemblies)
 		{
-			var baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Substring(8));
-			var outputFilePath = Path.Combine(baseDir, fileName);
+			string outputFilePath = GetOutputFilePath(outputAssemblyFileName);
+			EnsureFileDeleted(outputFilePath);
 
+			var parameters = new CompilerParameters { GenerateExecutable = false, OutputAssembly = outputAssemblyFileName };
+			parameters.ReferencedAssemblies.Add("System.Core.dll");
+			parameters.ReferencedAssemblies.AddRange(referencedAssemblies);
+
+			var codeProvider = CodeDomProvider.CreateProvider("CSharp");
+			var results = codeProvider.CompileAssemblyFromSource(parameters, source);
+
+			return Tuple.Create(results, outputFilePath);
+		}
+
+		protected static string ConvertCompilerErrorMessagesToString(CompilerErrorCollection compilerErrorCollection)
+		{
+			return string.Join(Environment.NewLine, compilerErrorCollection.Cast<CompilerError>().Select(x => x.ToString()));
+		}
+
+		private static void EnsureFileDeleted(string outputFilePath)
+		{
 			if (File.Exists(outputFilePath))
 			{
 				File.Delete(outputFilePath);
 			}
+		}
 
-			var parameters = new CompilerParameters { GenerateExecutable = false, OutputAssembly = fileName };
-			var codeProvider = CodeDomProvider.CreateProvider("CSharp");
-			CompilerResults results = codeProvider.CompileAssemblyFromSource(parameters, source);
+		private static string GetOutputFilePath(string fileName)
+		{
+			var baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Substring(8));
+			return Path.Combine(baseDir, fileName);
+		}
 
-			Assert.AreEqual(0, results.Errors.Count, string.Join(Environment.NewLine, results.Errors.Cast<CompilerError>().Select(x => x.ToString())));
+		private string CompileAssemblyAssertNoErrors(string fileName, string source)
+		{
+			Tuple<CompilerResults, string> results = CompileAssembly(fileName, source);
 
-			return Path.GetFullPath(outputFilePath);
+			Assert.AreEqual(0, results.Item1.Errors.Count, ConvertCompilerErrorMessagesToString(results.Item1.Errors));
+
+			return Path.GetFullPath(results.Item2);
 		}
 
 		private static void EnsureDirectoryCreated(string path)

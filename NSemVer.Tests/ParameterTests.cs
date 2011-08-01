@@ -1,5 +1,6 @@
 namespace NSemVer.Tests
 {
+	using System.Reflection;
 	using NUnit.Framework;
 
 	public class ParameterTests : ApiChangeTestBase
@@ -25,7 +26,7 @@ namespace NSemVer.Tests
 					}
 				}";
 
-			GivenContext(PreviousCode, CurrentCode)
+			GivenContext(PreviousCode, CurrentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
 				.When(ApiChangesDetermined)
 				.Then(HasParameterChange, ChangeType.Removed, "param1")
 				.ExecuteWithReport();
@@ -52,7 +53,7 @@ namespace NSemVer.Tests
 					}
 				}";
 
-			GivenContext(PreviousCode, CurrentCode)
+			GivenContext(PreviousCode, CurrentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
 				.When(ApiChangesDetermined)
 				.Then(HasParameterChange, ChangeType.Added, "param1")
 				.ExecuteWithReport();
@@ -79,7 +80,7 @@ namespace NSemVer.Tests
 					}
 				}";
 
-			GivenContext(PreviousCode, CurrentCode)
+			GivenContext(PreviousCode, CurrentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
 				.When(ApiChangesDetermined)
 				.And(HasParameterChange, ChangeType.Added, "param1")
 				.And(HasParameterChange, ChangeType.Added, "param2")
@@ -107,7 +108,7 @@ namespace NSemVer.Tests
 					}
 				}";
 
-			GivenContext(PreviousCode, CurrentCode)
+			GivenContext(PreviousCode, CurrentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
 				.When(ApiChangesDetermined)
 				.Then(HasParameterChange, ChangeType.Removed, "param1")
 				.And(HasParameterChange, ChangeType.Added, "param2")

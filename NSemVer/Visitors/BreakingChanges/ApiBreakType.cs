@@ -3,6 +3,7 @@
 	public enum ApiBreakType
 	{
 		TypeRemoved,
-		NewInstanceMethod
+		NewInstanceMethod,
+		MethodOverloadedWithInterfaceBasedParameter
 	}
 }
