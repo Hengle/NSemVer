@@ -64,12 +64,12 @@
 				},
 				{
 				    ApiBreakType.MethodOverloadedWithInterfaceBasedParameter,
-				    methodGroupChange => methodGroupChange.ChangeType == ChangeType.Matched && 
-				                         methodGroupChange.MethodChanges.Any(methodChange => 
-											methodChange.ChangeType == ChangeType.Added &&
-				                            methodChange.Method.IsPubliclyVisible() &&
-											methodChange.GetNewParameters(methodGroupChange).Any(x => x.ParameterType.Resolve().IsInterface)
-				                         )
+				    methodGroupChange => methodGroupChange.ChangeType == ChangeType.Matched && // ChangeType.Matched => Same named method or methods existed in previous version
+						methodGroupChange.MethodChanges.Any(methodChange => 
+							methodChange.ChangeType == ChangeType.Added &&
+							methodChange.Method.IsPubliclyVisible() &&
+							methodChange.GetNewParameters(methodGroupChange).Any(x => x.ParameterType.Resolve().IsInterface)
+						)
 				},
 			};
 		}
