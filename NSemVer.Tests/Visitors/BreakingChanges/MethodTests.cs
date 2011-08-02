@@ -170,5 +170,85 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 					.ExecuteWithReport();
 			}
 		}
+		
+		public class ChangingMethodSignatureTests : BreakingChangeVisitorTestsBase
+		{
+			private readonly string _previousCode;
+			private readonly string _currentCode;
+			private readonly string _brokenConsumerCode;
+
+			public ChangingMethodSignatureTests()
+			{
+				_previousCode = @"
+					namespace Api
+					{
+						using System;
+
+						<class-visibility> class Foo
+						{
+							<method-visibility> void Bar(int i) { }
+						}
+					}";
+
+				_currentCode = @"
+					namespace Api
+					{
+						using System;
+
+						<class-visibility> class Foo
+						{
+							<method-visibility> bool Bar(int i) { return default(bool); }
+						}
+					}";
+
+				_brokenConsumerCode = @"
+					namespace ApiConsumer
+					{
+						using Api;
+						using System;
+
+						public class Consumer
+						{
+							public void Example()
+							{
+								Action<int> test = new Foo().Bar;
+							}
+						}
+					}
+				";
+			}
+
+			[Test]
+			public void ChangingPublicMethodReturnType()
+			{
+				string previousCode = _previousCode.Replace("<class-visibility>", "public").Replace("<method-visibility>", "public");
+				string currentCode = _currentCode.Replace("<class-visibility>", "public").Replace("<method-visibility>", "public");
+
+				GivenContext(previousCode, currentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
+					.When(ApiChangesDetermined)
+					.And(BreakingChangeVisitorVisitsChanges)
+					.Then(BreakingChangeCountIs, 2)
+					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.MethodReturnTypeChanged, "System.Boolean Api.Foo::Bar(System.Int32)")
+					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.NewInstanceMethod, "System.Boolean Api.Foo::Bar(System.Int32)")
+					.And(ExampleBrokenConsumerCodeIs, _brokenConsumerCode, "error CS0407: 'bool Api.Foo.Bar(int)' has the wrong return type")
+					.ExecuteWithReport();
+			}
+
+			[TestCase("internal", "public")]
+			[TestCase("public", "internal")]
+			[TestCase("public", "protected")]
+			[TestCase("public", "private")]
+			public void ChangingNonPublicMethodReturnType(string classVisibility, string methodVisibility)
+			{
+				string previousCode = _previousCode.Replace("<class-visibility>", classVisibility).Replace("<method-visibility>", methodVisibility);
+				string currentCode = _currentCode.Replace("<class-visibility>", classVisibility).Replace("<method-visibility>", methodVisibility);
+
+				GivenContext(previousCode, currentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
+					.When(ApiChangesDetermined)
+					.And(BreakingChangeVisitorVisitsChanges)
+					.Then(NoBreakingChanges)
+					.ExecuteWithReport();
+			}
+		}
 	}
 }

@@ -43,7 +43,7 @@
 
 		protected void BreakingChangeCountIs(int expectedCount)
 		{
-			Assert.AreEqual(expectedCount, _breakingChanges.Length);
+			Assert.AreEqual(expectedCount, _breakingChanges.Length, "[" + string.Join(",", _breakingChanges.Select(x => x.BreakType)) + "]");
 		}
 
 		protected void SingleBreakingChangeReasonIs(ApiBreakType breakType)

@@ -4,6 +4,7 @@
 	{
 		TypeRemoved,
 		NewInstanceMethod,
-		MethodOverloadedWithInterfaceBasedParameter
+		MethodOverloadedWithInterfaceBasedParameter,
+		MethodReturnTypeChanged
 	}
 }

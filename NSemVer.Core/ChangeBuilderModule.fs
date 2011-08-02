@@ -33,7 +33,6 @@ let calcMethodChanges (older:MethodDefinition) (newer:MethodDefinition) =
     }
 
 let calcMethodGroupChanges (older:string * seq<MethodDefinition>) (newer:string * seq<MethodDefinition>) = 
-    
     let paramTypeComparer (older:ParameterDefinition) (newer:ParameterDefinition) = older.ParameterType.FullName.CompareTo(newer.ParameterType.FullName)
     let methodCheck (older:MethodDefinition) (newer:MethodDefinition) =
         older.Name = newer.Name &&

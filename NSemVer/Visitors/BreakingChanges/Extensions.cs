@@ -45,6 +45,13 @@
 				.ToArray();
 		}
 
+		public static IEnumerable<MethodDefinition> FindOverridesByParameterTypes(this IEnumerable<MethodDefinition> methods, MethodDefinition candidateOverrideMethod)
+		{
+			Func<MethodDefinition, string> getParameterTypesAsString = method => String.Join(",", method.Parameters.Select(p => p.ParameterType.FullName));
+			string candidateOverloadTypesString = getParameterTypesAsString(candidateOverrideMethod);
+			return methods.Where(m => getParameterTypesAsString(m) == candidateOverloadTypesString);
+		}
+
 		private class ParameterDefinitionComparer : IEqualityComparer<ParameterDefinition>
 		{
 			public bool Equals(ParameterDefinition x, ParameterDefinition y)

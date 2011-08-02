@@ -26,7 +26,23 @@
 				{
 					ApiBreakType.NewInstanceMethod,
 					methodGroupChange => methodGroupChange.GetAllNewMethodChanges().Any(methodChange => methodChange.Method.IsPubliclyVisible())
-					},
+				},
+				{
+					ApiBreakType.MethodReturnTypeChanged,
+					methodGroupChange =>
+					{
+						var allAddedOrUpdatedMethods = methodGroupChange.MethodChanges
+							.Where(x => x.Method.IsPubliclyVisible() && x.ChangeType != ChangeType.Removed)
+							.Select(x => x.Method)
+							.ToArray();
+						var removedMethods = methodGroupChange.MethodChanges
+							.Where(x => x.Method.IsPubliclyVisible() && x.ChangeType == ChangeType.Removed)
+							.Select(x => x.Method);
+						return removedMethods.Any(removedMethod => allAddedOrUpdatedMethods
+																	.FindOverridesByParameterTypes(removedMethod)
+							                      					.Any(m => m.ReturnType.FullName != removedMethod.ReturnType.FullName));
+					}
+				},
 				{
 					ApiBreakType.MethodOverloadedWithInterfaceBasedParameter,
 					methodGroupChange => methodGroupChange.ChangeType == ChangeType.Matched && // ChangeType.Matched => Same named method or methods existed in previous version
@@ -35,7 +51,7 @@
 					                                                         methodChange.Method.IsPubliclyVisible() &&
 					                                                         methodChange.GetNewParameters(methodGroupChange).Any(x => x.ParameterType.Resolve().IsInterface)
 					                     )
-					},
+				},
 			};
 		}
 

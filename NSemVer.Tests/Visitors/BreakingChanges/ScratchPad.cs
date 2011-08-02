@@ -1,20 +1,19 @@
+/*
 
 namespace Api
 {
 	using System;
 	using System.Collections;
 
-	public class A { }
-	public class B : A { }
-	public class C : B { }
-
 	public class Foo
 	{
-		public void Bar(IComparable x) { }
-		public void Bar(IFormattable x) { }
+		//public void Bar(IComparable x) { }
+		//public void Bar(IFormattable x) { }
 
-		public void Baz(A x) { }
-		public void Baz(B x) { }
+		//public void Baz(A x) { }
+		//public void Baz(B x) { }
+
+		public bool Bar(int i) { }
 	}
 }
 
@@ -30,7 +29,8 @@ namespace ApiConsumer
 			//int i = 99;
 			//new Foo().Bar(i);
 
-			new Foo().Baz(new C());
+			Action<int> test = new Foo().Bar;
+			test(99);
 		}
 	}
 
@@ -39,3 +39,4 @@ namespace ApiConsumer
 		public static void Bar(this Foo foo, ICloneable x) { }
 	}
 }
+*/
