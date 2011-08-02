@@ -1,7 +1,6 @@
 ﻿namespace NSemVer.Tests.Visitors.BreakingChanges
 {
 	using System.CodeDom.Compiler;
-	using System.Collections.Generic;
 	using System.Linq;
 	using NSemVer.Visitors;
 	using NSemVer.Visitors.BreakingChanges;
@@ -22,7 +21,12 @@
 
 		protected void BreakingChangeVisitor()
 		{
-			Sut = new BreakingChangeVisitor();
+			BreakingChangeVisitor(new DefaultBreakingChangeDefinitionsProvider());
+		}
+
+		protected void BreakingChangeVisitor(IBreakingChangeDefinitionsProvider breakingChangeDefinitionsProvider)
+		{
+			Sut = new BreakingChangeVisitor(breakingChangeDefinitionsProvider);
 		}
 
 		protected void BreakingChangeVisitorVisitsChanges()
