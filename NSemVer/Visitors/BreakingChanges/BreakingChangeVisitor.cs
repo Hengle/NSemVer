@@ -8,6 +8,11 @@
 		private readonly IBreakingChangeDefinitionsProvider _breakingChangeDefinitionsProvider;
 		private readonly List<BreakingChangeResult> _breakingChanges = new List<BreakingChangeResult>();
 
+		public BreakingChangeVisitor()
+			: this (new DefaultBreakingChangeDefinitionsProvider())
+		{
+		}
+
 		public BreakingChangeVisitor(IBreakingChangeDefinitionsProvider breakingChangeDefinitionsProvider)
 		{
 			_breakingChangeDefinitionsProvider = breakingChangeDefinitionsProvider;
