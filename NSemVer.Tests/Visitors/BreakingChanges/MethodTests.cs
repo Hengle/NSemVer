@@ -227,9 +227,10 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 				GivenContext(previousCode, currentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
 					.When(ApiChangesDetermined)
 					.And(BreakingChangeVisitorVisitsChanges)
-					.Then(BreakingChangeCountIs, 2)
+					.Then(BreakingChangeCountIs, 3)
 					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.MethodReturnTypeChanged, "System.Boolean Api.Foo::Bar(System.Int32)")
 					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.NewInstanceMethod, "System.Boolean Api.Foo::Bar(System.Int32)")
+					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.InstanceMethodRemoved, "System.Void Api.Foo::Bar(System.Int32)")
 					.And(ExampleBrokenConsumerCodeIs, _brokenConsumerCode, "error CS0407: 'bool Api.Foo.Bar(int)' has the wrong return type")
 					.ExecuteWithReport();
 			}
@@ -239,6 +240,84 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 			[TestCase("public", "protected")]
 			[TestCase("public", "private")]
 			public void ChangingNonPublicMethodReturnType(string classVisibility, string methodVisibility)
+			{
+				string previousCode = _previousCode.Replace("<class-visibility>", classVisibility).Replace("<method-visibility>", methodVisibility);
+				string currentCode = _currentCode.Replace("<class-visibility>", classVisibility).Replace("<method-visibility>", methodVisibility);
+
+				GivenContext(previousCode, currentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
+					.When(ApiChangesDetermined)
+					.And(BreakingChangeVisitorVisitsChanges)
+					.Then(NoBreakingChanges)
+					.ExecuteWithReport();
+			}
+		}
+		
+		public class RemovingMethodTests : BreakingChangeVisitorTestsBase
+		{
+			private readonly string _previousCode;
+			private readonly string _currentCode;
+			private readonly string _brokenConsumerCode;
+
+			public RemovingMethodTests()
+			{
+				_previousCode = @"
+					namespace Api
+					{
+						using System;
+
+						<class-visibility> class Foo
+						{
+							<method-visibility> void Bar() { }
+						}
+					}";
+
+				_currentCode = @"
+					namespace Api
+					{
+						using System;
+
+						<class-visibility> class Foo
+						{
+						}
+					}";
+
+				_brokenConsumerCode = @"
+					namespace ApiConsumer
+					{
+						using Api;
+						using System;
+
+						public class Consumer
+						{
+							public void Example()
+							{
+								new Foo().Bar();
+							}
+						}
+					}
+				";
+			}
+
+			[Test]
+			public void RemovingPublicMethod()
+			{
+				string previousCode = _previousCode.Replace("<class-visibility>", "public").Replace("<method-visibility>", "public");
+				string currentCode = _currentCode.Replace("<class-visibility>", "public").Replace("<method-visibility>", "public");
+
+				GivenContext(previousCode, currentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
+					.When(ApiChangesDetermined)
+					.And(BreakingChangeVisitorVisitsChanges)
+					.Then(BreakingChangeCountIs, 1)
+					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.InstanceMethodRemoved, "System.Void Api.Foo::Bar()")
+					.And(ExampleBrokenConsumerCodeIs, _brokenConsumerCode, "error CS1061: 'Api.Foo' does not contain a definition for 'Bar' and no extension method 'Bar' accepting a first argument of type 'Api.Foo' could be found")
+					.ExecuteWithReport();
+			}
+
+			[TestCase("internal", "public")]
+			[TestCase("public", "internal")]
+			[TestCase("public", "protected")]
+			[TestCase("public", "private")]
+			public void RemovingNonPublicMethod(string classVisibility, string methodVisibility)
 			{
 				string previousCode = _previousCode.Replace("<class-visibility>", classVisibility).Replace("<method-visibility>", methodVisibility);
 				string currentCode = _currentCode.Replace("<class-visibility>", classVisibility).Replace("<method-visibility>", methodVisibility);

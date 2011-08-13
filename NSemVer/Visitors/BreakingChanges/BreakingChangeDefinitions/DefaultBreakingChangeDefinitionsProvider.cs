@@ -29,22 +29,13 @@
 			{
 				{
 					ApiBreakType.NewInstanceMethod,
-					(methodGroupChange, ctx) =>
-					{
-						return
-							ctx.ParentTypeChange.ChangeType != ChangeType.Added &&
-							methodGroupChange.GetAllMethodChangesOfType(ChangeType.Added).Any(methodChange => methodChange.Method.IsPubliclyVisible());
-					}
+					(methodGroupChange, ctx) => methodGroupChange.GetAllMethodChangesOfType(ChangeType.Added).Any(methodChange => methodChange.Method.IsPubliclyVisible())
 				},
 
-				//{
-				//    ApiBreakType.InstanceMethodRemoved,
-				//    methodGroupChange =>
-				//    {
-				//        IEnumerable<MethodChange> removedMethods = methodGroupChange.GetAllMethodChangesOfType(ChangeType.Removed).ToArray();
-				//        return removedMethods.Any(methodChange => methodChange.Method.IsPubliclyVisible());
-				//    }
-				//},
+				{
+				    ApiBreakType.InstanceMethodRemoved,
+				    (methodGroupChange, ctx) => methodGroupChange.GetAllMethodChangesOfType(ChangeType.Removed).Any(methodChange => methodChange.Method.IsPubliclyVisible())
+				},
 
 				{
 					ApiBreakType.MethodReturnTypeChanged,

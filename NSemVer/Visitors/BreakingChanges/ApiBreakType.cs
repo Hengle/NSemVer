@@ -5,6 +5,7 @@
 		TypeRemoved,
 		NewInstanceMethod,
 		MethodOverloadedWithInterfaceBasedParameter,
-		MethodReturnTypeChanged
+		MethodReturnTypeChanged,
+		InstanceMethodRemoved
 	}
 }
