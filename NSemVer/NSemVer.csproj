@@ -62,7 +62,6 @@
     <Compile Include="Visitors\VisitorBase.cs" />
     <Compile Include="Visitors\IChangeVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Visitors\VisitorExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ILMerge.bat" />
