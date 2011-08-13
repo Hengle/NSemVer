@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{E2216B55-E039-423B-AF84-578BAB854F79}</ProjectGuid>
+    <ProjectGuid>{A8F01D62-8B57-4281-B44D-EF71E6198116}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NSemVer</RootNamespace>
-    <AssemblyName>NSemVer</AssemblyName>
+    <RootNamespace>TestLib</RootNamespace>
+    <AssemblyName>TestLib</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -30,13 +30,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Mono.Cecil">
-      <HintPath>..\packages\Mono.Cecil.0.9.5.0\lib\net40\Mono.Cecil.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,34 +40,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChangeBuilderExtensions.cs" />
-    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitionsProviderBase.cs" />
-    <Compile Include="Visitors\BreakingChanges\BreakingChangeResult.cs" />
-    <Compile Include="Visitors\BreakingChanges\ApiBreakType.cs" />
-    <Compile Include="Visitors\BreakingChanges\BreakingChangeVisitor.cs" />
-    <Compile Include="Visitors\BreakingChanges\DefaultBreakingChangeDefinitionsProvider.cs" />
-    <Compile Include="Visitors\BreakingChanges\Extensions.cs" />
-    <Compile Include="Visitors\BreakingChanges\IBreakingChangeDefinitionsProvider.cs" />
-    <Compile Include="Visitors\IChangeVisitor.cs" />
+    <Compile Include="Foo1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Visitors\VisitorExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ILMerge.bat" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NSemVer.Core\NSemVer.Core.fsproj">
-      <Project>{7725CA86-E103-492F-BA4A-C525BB169F5E}</Project>
-      <Name>NSemVer.Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>rem Not ILMerging for now as it causes issues with R#. See http://youtrack.jetbrains.net/issue/RSRP-192616
-rem $(ProjectDir)ILMerge.bat $(TargetDir)
-$(SolutionDir)CopyBuildOutput.bat $(TargetDir) $(SolutionDir)</PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

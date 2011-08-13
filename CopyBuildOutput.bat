@@ -1,0 +1,3 @@
+rem A quick hack...
+IF NOT EXIST "%2build" mkdir "%2build"
+copy /Y "%1*.*" "%2build"
