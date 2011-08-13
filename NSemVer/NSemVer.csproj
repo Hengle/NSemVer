@@ -47,13 +47,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChangeBuilderExtensions.cs" />
-    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitionsProviderBase.cs" />
+    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\BreakingChangeDefinitionsProviderBase.cs" />
     <Compile Include="Visitors\BreakingChanges\BreakingChangeResult.cs" />
     <Compile Include="Visitors\BreakingChanges\ApiBreakType.cs" />
     <Compile Include="Visitors\BreakingChanges\BreakingChangeVisitor.cs" />
-    <Compile Include="Visitors\BreakingChanges\DefaultBreakingChangeDefinitionsProvider.cs" />
+    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\DefaultBreakingChangeDefinitionsProvider.cs" />
     <Compile Include="Visitors\BreakingChanges\Extensions.cs" />
-    <Compile Include="Visitors\BreakingChanges\IBreakingChangeDefinitionsProvider.cs" />
+    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\IBreakingChangeDefinitionsProvider.cs" />
     <Compile Include="Visitors\VisitorBase.cs" />
     <Compile Include="Visitors\IChangeVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

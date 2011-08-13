@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using NSemVer.Visitors.BreakingChanges.BreakingChangeDefinitions;
 
 	public class BreakingChangeVisitor : VisitorBase
 	{

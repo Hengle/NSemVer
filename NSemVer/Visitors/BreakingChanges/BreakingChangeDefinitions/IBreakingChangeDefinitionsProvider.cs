@@ -1,4 +1,4 @@
-namespace NSemVer.Visitors.BreakingChanges
+namespace NSemVer.Visitors.BreakingChanges.BreakingChangeDefinitions
 {
 	using System;
 	using System.Collections.Generic;
