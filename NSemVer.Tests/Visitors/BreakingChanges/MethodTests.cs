@@ -68,7 +68,7 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 					.When(ApiChangesDetermined)
 					.And(BreakingChangeVisitorVisitsChanges)
 					.Then(BreakingChangeCountIs, 1)
-					.And(BreakingMethodChangeDetected, ApiBreakType.NewInstanceMethod, "System.Void Api.Foo::Baz()")
+					.And(BreakingMethodChangeDetected, ApiBreakType.InstanceMethodAdded, "System.Void Api.Foo::Baz()")
 					.And(ExampleNonBreakingButSemanticallyDifferentConsumerCodeIs, _semanticallyChangedConsumerCode)
 					.ExecuteWithReport();
 			}
@@ -148,7 +148,7 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 					.When(ApiChangesDetermined)
 					.And(BreakingChangeVisitorVisitsChanges)
 					.Then(BreakingChangeCountIs, 2)
-					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.NewInstanceMethod, "System.Void Api.Foo::Bar(System.IFormattable)")
+					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.InstanceMethodAdded, "System.Void Api.Foo::Bar(System.IFormattable)")
 					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.MethodOverloadedWithInterfaceBasedParameter, "System.Void Api.Foo::Bar(System.IFormattable)")
 					.And(ExampleBrokenConsumerCodeIs, _brokenConsumerCode, "error CS0121: The call is ambiguous")
 					.ExecuteWithReport();
@@ -229,7 +229,7 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 					.And(BreakingChangeVisitorVisitsChanges)
 					.Then(BreakingChangeCountIs, 3)
 					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.MethodReturnTypeChanged, "System.Boolean Api.Foo::Bar(System.Int32)")
-					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.NewInstanceMethod, "System.Boolean Api.Foo::Bar(System.Int32)")
+					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.InstanceMethodAdded, "System.Boolean Api.Foo::Bar(System.Int32)")
 					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.InstanceMethodRemoved, "System.Void Api.Foo::Bar(System.Int32)")
 					.And(ExampleBrokenConsumerCodeIs, _brokenConsumerCode, "error CS0407: 'bool Api.Foo.Bar(int)' has the wrong return type")
 					.ExecuteWithReport();

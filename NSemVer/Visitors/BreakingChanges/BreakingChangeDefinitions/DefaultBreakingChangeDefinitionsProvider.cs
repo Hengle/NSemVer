@@ -28,7 +28,7 @@
 			return new Dictionary<ApiBreakType, Func<MethodGroupChange, MethodGroupChangeContext, bool>>
 			{
 				{
-					ApiBreakType.NewInstanceMethod,
+					ApiBreakType.InstanceMethodAdded,
 					(methodGroupChange, ctx) => methodGroupChange.GetAllMethodChangesOfType(ChangeType.Added).Any(methodChange => methodChange.Method.IsPubliclyVisible())
 				},
 
