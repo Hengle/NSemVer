@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using NSemVer.Visitors.Context;
 
 	public class DefaultBreakingChangeDefinitionsProvider : BreakingChangeDefinitionsProviderBase
 	{
@@ -11,25 +12,43 @@
 		{
 		}
 
-		private static IDictionary<ApiBreakType, Func<TypeChange, bool>> CreateBreakingTypeChanges()
+		private static IDictionary<ApiBreakType, Func<TypeChange, TypeChangeContext, bool>> CreateBreakingTypeChanges()
 		{
-			return new Dictionary<ApiBreakType, Func<TypeChange, bool>>
+			return new Dictionary<ApiBreakType, Func<TypeChange, TypeChangeContext, bool>>
 			{
-				{ ApiBreakType.TypeRemoved, change => change.Type.IsPublic && change.ChangeType == ChangeType.Removed },
+				{
+					ApiBreakType.TypeRemoved,
+					(change, ctx) => change.Type.IsPublic && change.ChangeType == ChangeType.Removed
+				},
 			};
 		}
 
-		private static IDictionary<ApiBreakType, Func<MethodGroupChange, bool>> CreateBreakingMethodGroupChanges()
+		private static IDictionary<ApiBreakType, Func<MethodGroupChange, MethodGroupChangeContext, bool>> CreateBreakingMethodGroupChanges()
 		{
-			return new Dictionary<ApiBreakType, Func<MethodGroupChange, bool>>
+			return new Dictionary<ApiBreakType, Func<MethodGroupChange, MethodGroupChangeContext, bool>>
 			{
 				{
 					ApiBreakType.NewInstanceMethod,
-					methodGroupChange => methodGroupChange.GetAllNewMethodChanges().Any(methodChange => methodChange.Method.IsPubliclyVisible())
+					(methodGroupChange, ctx) =>
+					{
+						return
+							ctx.ParentTypeChange.ChangeType != ChangeType.Added &&
+							methodGroupChange.GetAllMethodChangesOfType(ChangeType.Added).Any(methodChange => methodChange.Method.IsPubliclyVisible());
+					}
 				},
+
+				//{
+				//    ApiBreakType.InstanceMethodRemoved,
+				//    methodGroupChange =>
+				//    {
+				//        IEnumerable<MethodChange> removedMethods = methodGroupChange.GetAllMethodChangesOfType(ChangeType.Removed).ToArray();
+				//        return removedMethods.Any(methodChange => methodChange.Method.IsPubliclyVisible());
+				//    }
+				//},
+
 				{
 					ApiBreakType.MethodReturnTypeChanged,
-					methodGroupChange =>
+					(methodGroupChange, ctx) =>
 					{
 						var allAddedOrUpdatedMethods = methodGroupChange.MethodChanges
 							.Where(x => x.Method.IsPubliclyVisible() && x.ChangeType != ChangeType.Removed)
@@ -43,28 +62,30 @@
 							                      					.Any(m => m.ReturnType.FullName != removedMethod.ReturnType.FullName));
 					}
 				},
+
 				{
 					ApiBreakType.MethodOverloadedWithInterfaceBasedParameter,
-					methodGroupChange => methodGroupChange.ChangeType == ChangeType.Matched && // ChangeType.Matched => Same named method or methods existed in previous version
-					                     methodGroupChange.MethodChanges.Any(methodChange => 
-					                                                         methodChange.ChangeType == ChangeType.Added &&
-					                                                         methodChange.Method.IsPubliclyVisible() &&
-					                                                         methodChange.GetNewParameters(methodGroupChange).Any(x => x.ParameterType.Resolve().IsInterface)
-					                     )
+					(methodGroupChange, ctx) =>
+						methodGroupChange.ChangeType == ChangeType.Matched && // ChangeType.Matched => Same named method or methods existed in previous version
+					    methodGroupChange.MethodChanges.Any(methodChange => 
+					                                        methodChange.ChangeType == ChangeType.Added &&
+					                                        methodChange.Method.IsPubliclyVisible() &&
+					                                        methodChange.GetNewParameters(methodGroupChange).Any(x => x.ParameterType.Resolve().IsInterface)
+					    )
 				},
 			};
 		}
 
-		private static IDictionary<ApiBreakType, Func<MethodChange, bool>> CreateBreakingMethodChanges()
+		private static IDictionary<ApiBreakType, Func<MethodChange, MethodChangeContext, bool>> CreateBreakingMethodChanges()
 		{
-			return new Dictionary<ApiBreakType, Func<MethodChange, bool>>
+			return new Dictionary<ApiBreakType, Func<MethodChange, MethodChangeContext, bool>>
 			{
 			};
 		}
 
-		private static IDictionary<ApiBreakType, Func<ParameterChange, bool>> CreateBreakingParameterChangeChanges()
+		private static IDictionary<ApiBreakType, Func<ParameterChange, ParameterChangeContext, bool>> CreateBreakingParameterChangeChanges()
 		{
-			return new Dictionary<ApiBreakType, Func<ParameterChange, bool>>
+			return new Dictionary<ApiBreakType, Func<ParameterChange, ParameterChangeContext, bool>>
 			{
 			};
 		}

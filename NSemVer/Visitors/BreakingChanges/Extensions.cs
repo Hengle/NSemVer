@@ -12,12 +12,12 @@
 			return method.IsPublic && method.DeclaringType.IsPublic;
 		}
 
-		public static IEnumerable<MethodChange> GetAllNewMethodChanges(this MethodGroupChange methodGroupChange)
+		public static IEnumerable<MethodChange> GetAllMethodChangesOfType(this MethodGroupChange methodGroupChange, ChangeType changeType)
 		{
-			return methodGroupChange.ChangeType == ChangeType.Added
+			return methodGroupChange.ChangeType == changeType
 			       	? methodGroupChange.MethodChanges
 			       	: methodGroupChange.ChangeType == ChangeType.Matched
-			       	  	? methodGroupChange.MethodChanges.Where(x => x.ChangeType == ChangeType.Added)
+						? methodGroupChange.MethodChanges.Where(x => x.ChangeType == changeType)
 			       	  	: new MethodChange[0];
 		}
 

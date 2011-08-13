@@ -4,6 +4,7 @@
 	using System.Linq;
 	using NSemVer.Visitors;
 	using NSemVer.Visitors.BreakingChanges;
+	using NSemVer.Visitors.BreakingChanges.BreakingChangeDefinitions;
 	using NUnit.Framework;
 	using StoryQ;
 
@@ -31,7 +32,7 @@
 
 		protected void BreakingChangeVisitorVisitsChanges()
 		{
-			AssemblyChanges.Visit(Sut);
+			Sut.Visit(AssemblyChanges);
 
 			_breakingChanges = Sut.BreakingChanges.ToArray();
 		}

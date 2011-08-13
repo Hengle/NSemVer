@@ -1,48 +1,72 @@
 ﻿namespace NSemVer.Visitors
 {
+	using NSemVer.Visitors.Context;
+
 	public abstract class VisitorBase : IChangeVisitor
 	{
-		public virtual void Visit(AssemblyChanges change)
+		public virtual void Visit(AssemblyChanges assemblyChanges)
 		{
-			foreach (var moduleChange in change.ModuleChanges)
+			var context = new ModuleChangeContext(assemblyChanges);
+
+			foreach (var moduleChange in assemblyChanges.ModuleChanges)
 			{
-				Visit(moduleChange);
+				Visit(moduleChange, context);
 			}
 		}
 
-		public virtual void Visit(ModuleChange change)
+		protected virtual void Visit(ModuleChange moduleChange, ModuleChangeContext moduleChangeContext)
 		{
-			foreach (var typeChange in change.TypeChanges)
+			var typeChangeContext = new TypeChangeContext(moduleChangeContext.AssemblyChanges, moduleChange);
+
+			foreach (var typeChange in moduleChange.TypeChanges)
 			{
-				Visit(typeChange);
+				Visit(typeChange, typeChangeContext);
 			}
 		}
 
-		public virtual void Visit(TypeChange change)
+		protected virtual void Visit(TypeChange typeChange, TypeChangeContext typeChangeContext)
 		{
-			foreach (var methodGroupChange in change.MethodGroupChanges)
+			var methodGroupChangeContext = new MethodGroupChangeContext(
+				typeChangeContext.AssemblyChanges,
+				typeChangeContext.ParentModuleChange,
+				typeChange);
+
+			foreach (var methodGroupChange in typeChange.MethodGroupChanges)
 			{
-				Visit(methodGroupChange);
+				Visit(methodGroupChange, methodGroupChangeContext);
 			}
 		}
 
-		public virtual void Visit(MethodGroupChange change)
+		protected virtual void Visit(MethodGroupChange methodGroupChange, MethodGroupChangeContext methodGroupChangeContext)
 		{
-			foreach (var methodChange in change.MethodChanges)
+			var methodChangeContext = new MethodChangeContext(
+				methodGroupChangeContext.AssemblyChanges,
+				methodGroupChangeContext.ParentModuleChange,
+				methodGroupChangeContext.ParentTypeChange,
+				methodGroupChange);
+
+			foreach (var methodChange in methodGroupChange.MethodChanges)
 			{
-				Visit(methodChange);
+				Visit(methodChange, methodChangeContext);
 			}
 		}
 
-		public virtual void Visit(MethodChange change)
+		protected virtual void Visit(MethodChange methodChange, MethodChangeContext methodChangeContext)
 		{
-			foreach (var parameterChange in change.ParameterChanges)
+			var context = new ParameterChangeContext(
+				methodChangeContext.AssemblyChanges,
+				methodChangeContext.ParentModuleChange,
+				methodChangeContext.ParentTypeChange,
+				methodChangeContext.ParentMethodGroupChange,
+				methodChange);
+
+			foreach (var parameterChange in methodChange.ParameterChanges)
 			{
-				Visit(parameterChange);
+				Visit(parameterChange, context);
 			}
 		}
 
-		public virtual void Visit(ParameterChange change)
+		protected virtual void Visit(ParameterChange parameterChange, ParameterChangeContext parameterChangeContext)
 		{
 		}
 	}

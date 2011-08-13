@@ -54,6 +54,11 @@
     <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\DefaultBreakingChangeDefinitionsProvider.cs" />
     <Compile Include="Visitors\BreakingChanges\Extensions.cs" />
     <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\IBreakingChangeDefinitionsProvider.cs" />
+    <Compile Include="Visitors\Context\MethodChangeContext.cs" />
+    <Compile Include="Visitors\Context\MethodGroupChangeContext.cs" />
+    <Compile Include="Visitors\Context\ModuleChangeContext.cs" />
+    <Compile Include="Visitors\Context\ParameterChangeContext.cs" />
+    <Compile Include="Visitors\Context\TypeChangeContext.cs" />
     <Compile Include="Visitors\VisitorBase.cs" />
     <Compile Include="Visitors\IChangeVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

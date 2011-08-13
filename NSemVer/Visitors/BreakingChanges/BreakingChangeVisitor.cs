@@ -2,7 +2,9 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using NSemVer.Visitors.BreakingChanges.BreakingChangeDefinitions;
+	using NSemVer.Visitors.Context;
 
 	public class BreakingChangeVisitor : VisitorBase
 	{
@@ -24,39 +26,51 @@
 			get { return _breakingChanges; }
 		}
 
-		public override void Visit(TypeChange change)
+		protected override void Visit(TypeChange typeChange, TypeChangeContext typeChangeContext)
 		{
-			Visit(_breakingChangeDefinitionsProvider.BreakingTypeChanges, change);
-			base.Visit(change);
-		}
-
-		public override void Visit(MethodGroupChange change)
-		{
-			Visit(_breakingChangeDefinitionsProvider.BreakingMethodGroupChanges, change);
-			base.Visit(change);
-		}
-
-		public override void Visit(MethodChange change)
-		{
-			Visit(_breakingChangeDefinitionsProvider.BreakingMethodChanges, change);
-			base.Visit(change);
-		}
-
-		public override void Visit(ParameterChange change)
-		{
-			Visit(_breakingChangeDefinitionsProvider.BreakingParameterChanges, change);
-			base.Visit(change);
-		}
-
-		private void Visit<TChange>(IEnumerable<KeyValuePair<ApiBreakType, Func<TChange, bool>>> breakingTypeChangeFuncs, TChange change)
-		{
-			foreach (var breakingTypeChangeFunc in breakingTypeChangeFuncs)
+			if (0 == DetermineBreakingChanges(_breakingChangeDefinitionsProvider.BreakingTypeChanges, typeChange, typeChangeContext))
 			{
-				if (breakingTypeChangeFunc.Value(change))
-				{
-					_breakingChanges.Add(new BreakingChangeResult(breakingTypeChangeFunc.Key, change));
-				}
+				base.Visit(typeChange, typeChangeContext);
 			}
+		}
+
+		protected override void Visit(MethodGroupChange methodGroupChange, MethodGroupChangeContext methodGroupChangeContext)
+		{
+			if (0 == DetermineBreakingChanges(_breakingChangeDefinitionsProvider.BreakingMethodGroupChanges, methodGroupChange, methodGroupChangeContext))
+			{
+				base.Visit(methodGroupChange, methodGroupChangeContext);
+			}
+		}
+
+		protected override void Visit(MethodChange methodChange, MethodChangeContext methodChangeContext)
+		{
+			if (0 == DetermineBreakingChanges(_breakingChangeDefinitionsProvider.BreakingMethodChanges, methodChange, methodChangeContext))
+			{
+				base.Visit(methodChange, methodChangeContext);
+			}
+		}
+
+		protected override void Visit(ParameterChange parameterChange, ParameterChangeContext parameterChangeContext)
+		{
+			if (0 == DetermineBreakingChanges(_breakingChangeDefinitionsProvider.BreakingParameterChanges, parameterChange, parameterChangeContext))
+			{
+				base.Visit(parameterChange, parameterChangeContext);
+			}
+		}
+
+		private int DetermineBreakingChanges<TChange, TChangeContext>(
+			IEnumerable<KeyValuePair<ApiBreakType, Func<TChange, TChangeContext, bool>>> breakingTypeChangeFuncs,
+			TChange change,
+			TChangeContext context)
+		{
+			var breakingChanges = breakingTypeChangeFuncs
+				.Where(breakingTypeChangeFunc => breakingTypeChangeFunc.Value(change, context))
+				.Select(keyValuePair => new BreakingChangeResult(keyValuePair.Key, change))
+				.ToList();
+
+			_breakingChanges.AddRange(breakingChanges);
+
+			return breakingChanges.Count;
 		}
 	}
 }

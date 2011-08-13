@@ -7,10 +7,9 @@
 		public static void Visit(this AssemblyChanges assemblyChanges, IChangeVisitor visitor)
 		{
 			visitor.Visit(assemblyChanges);
-
-			assemblyChanges.ModuleChanges.Visit(visitor);
 		}
 
+		/*
 		public static void Visit(this IEnumerable<ModuleChange> moduleChanges, IChangeVisitor visitor)
 		{
 			foreach (var moduleChange in moduleChanges)
@@ -69,6 +68,6 @@
 			{
 				visitor.Visit(parameterChange);
 			}
-		}
+		}*/
 	}
 }
