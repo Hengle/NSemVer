@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 
-	public class BreakingChangeVisitor : IChangeVisitor
+	public class BreakingChangeVisitor : VisitorBase
 	{
 		private readonly IBreakingChangeDefinitionsProvider _breakingChangeDefinitionsProvider;
 		private readonly List<BreakingChangeResult> _breakingChanges = new List<BreakingChangeResult>();
@@ -23,32 +23,28 @@
 			get { return _breakingChanges; }
 		}
 
-		public void Visit(AssemblyChanges change)
-		{	
-		}
-
-		public void Visit(ModuleChange change)
-		{	
-		}
-
-		public void Visit(TypeChange change)
+		public override void Visit(TypeChange change)
 		{
 			Visit(_breakingChangeDefinitionsProvider.BreakingTypeChanges, change);
+			base.Visit(change);
 		}
 
-		public void Visit(MethodGroupChange change)
+		public override void Visit(MethodGroupChange change)
 		{
 			Visit(_breakingChangeDefinitionsProvider.BreakingMethodGroupChanges, change);
+			base.Visit(change);
 		}
 
-		public void Visit(MethodChange change)
+		public override void Visit(MethodChange change)
 		{
 			Visit(_breakingChangeDefinitionsProvider.BreakingMethodChanges, change);
+			base.Visit(change);
 		}
 
-		public void Visit(ParameterChange change)
+		public override void Visit(ParameterChange change)
 		{
 			Visit(_breakingChangeDefinitionsProvider.BreakingParameterChanges, change);
+			base.Visit(change);
 		}
 
 		private void Visit<TChange>(IEnumerable<KeyValuePair<ApiBreakType, Func<TChange, bool>>> breakingTypeChangeFuncs, TChange change)
