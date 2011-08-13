@@ -21,7 +21,8 @@
 				if (!VerifyFileExists(oldAssemblyPath) || !VerifyFileExists(newAssemblyPath))
 					return;
 
-				CompareAssemblies(Console.Out, oldAssemblyPath, newAssemblyPath, arguments.QuickAndQuietMode);
+				TextWriter writer = arguments.QuickAndQuietMode ? new StringWriter() : Console.Out;
+				CompareAssemblies(writer, oldAssemblyPath, newAssemblyPath, arguments.QuickAndQuietMode);
 
 				return;
 			}
