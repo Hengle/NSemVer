@@ -42,7 +42,8 @@
 			using (var oldAssembly = File.Open(oldAssemblyPath, FileMode.Open))
 			using (var newAssembly = File.Open(newAssemblyPath, FileMode.Open))
 			{
-				AssemblyChanges changes = new ChangeBuilder().GetChanges(oldAssembly, newAssembly);
+				var changesBuilder = new AssemblyChangesBuilder();
+				AssemblyChanges changes = changesBuilder.GetChanges(oldAssembly, newAssembly);
 
 				var breakingChangeVisitor = new BreakingChangeVisitor();
 				breakingChangeVisitor.Visit(changes);

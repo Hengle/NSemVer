@@ -5,7 +5,7 @@ namespace NSemVer
 
 	public static class ChangeBuilderExtensions
 	{
-		public static AssemblyChanges GetChanges(this ChangeBuilder changeBuilder, Stream olderAssemblyStream, Stream newerAssemblyStream)
+		public static AssemblyChanges GetChanges(this AssemblyChangesBuilder changeBuilder, Stream olderAssemblyStream, Stream newerAssemblyStream)
 		{
 			return changeBuilder.GetChanges(
 				AssemblyDefinition.ReadAssembly(olderAssemblyStream),
