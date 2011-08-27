@@ -39,12 +39,15 @@
 				{
 					if (breakingChanges.Any())
 					{
-						Console.WriteLine("Found breaking changes:");
+						Console.WriteLine();
+						Console.WriteLine("Found {0} breaking changes:".FormatInvariant(breakingChanges.Count()));
 
 						foreach (var breakingChange in breakingChanges)
 						{
-							Console.WriteLine("  [{0}] {1}".FormatInvariant(breakingChange.BreakType, breakingChange.Description));
+							Console.WriteLine("  - {0}".FormatInvariant(breakingChange.Description));
 						}
+
+						Console.WriteLine();
 					}
 				}
 				return;
