@@ -47,18 +47,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChangeBuilderExtensions.cs" />
-    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\BreakingChangeDefinitionsProviderBase.cs" />
-    <Compile Include="Visitors\BreakingChanges\BreakingChangeResult.cs" />
+    <Compile Include="Visitors\BreakingChanges\BreakingChange.cs" />
+    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\BreakingChangeDefinitionsBase.cs" />
+    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\BreakingChangeDefinitionsProvider.cs" />
     <Compile Include="Visitors\BreakingChanges\ApiBreakType.cs" />
+    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\Impl\BreakingMethodGroupChanges.cs" />
+    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\Impl\BreakingTypeChanges.cs" />
+    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\IBreakingChangeDefinitions.cs" />
+    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\Impl\BreakingMethodChanges.cs" />
+    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\Impl\BreakingParameterChanges.cs" />
     <Compile Include="Visitors\BreakingChanges\BreakingChangeVisitor.cs" />
-    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\DefaultBreakingChangeDefinitionsProvider.cs" />
     <Compile Include="Visitors\BreakingChanges\Extensions.cs" />
-    <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\IBreakingChangeDefinitionsProvider.cs" />
     <Compile Include="Visitors\Context\MethodChangeContext.cs" />
     <Compile Include="Visitors\Context\MethodGroupChangeContext.cs" />
     <Compile Include="Visitors\Context\ModuleChangeContext.cs" />
     <Compile Include="Visitors\Context\ParameterChangeContext.cs" />
     <Compile Include="Visitors\Context\TypeChangeContext.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Visitors\VisitorBase.cs" />
     <Compile Include="Visitors\IChangeVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

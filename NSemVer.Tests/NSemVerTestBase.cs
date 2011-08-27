@@ -60,7 +60,7 @@ namespace NSemVer.Tests
 			using (var assembly1Stream = File.Open(OldAssemblyPath, FileMode.Open))
 			using (var assembly2Stream = File.Open(NewAssemblyPath, FileMode.Open))
 			{
-				var changeBuilder = new ChangeBuilder();
+				var changeBuilder = new AssemblyChangesBuilder();
 
 				AssemblyChanges = changeBuilder.GetChanges(assembly1Stream, assembly2Stream);
 			}

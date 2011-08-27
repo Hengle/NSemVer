@@ -21,9 +21,32 @@
 				if (!VerifyFileExists(oldAssemblyPath) || !VerifyFileExists(newAssemblyPath))
 					return;
 
-				TextWriter writer = arguments.QuickAndQuietMode ? new StringWriter() : Console.Out;
-				CompareAssemblies(writer, oldAssemblyPath, newAssemblyPath, arguments.QuickAndQuietMode);
+				Console.WriteLine("Comparing:");
+				Console.WriteLine("Old: {0}".FormatInvariant(Path.GetFullPath(oldAssemblyPath)));
+				Console.WriteLine("New: {0}".FormatInvariant(Path.GetFullPath(newAssemblyPath)));
 
+				var breakingChanges = CompareAssemblies(oldAssemblyPath, newAssemblyPath);
+
+				if (arguments.QuickAndQuietMode)
+				{
+					if (breakingChanges.Any())
+					{
+						Environment.ExitCode = 1;
+						return;
+					}
+				}
+				else
+				{
+					if (breakingChanges.Any())
+					{
+						Console.WriteLine("Found breaking changes:");
+
+						foreach (var breakingChange in breakingChanges)
+						{
+							Console.WriteLine("  [{0}] {1}".FormatInvariant(breakingChange.BreakType, breakingChange.Description));
+						}
+					}
+				}
 				return;
 			}
 			catch (CommandLineException exception)
@@ -33,41 +56,18 @@
 			} 
 		}
 
-		private static void CompareAssemblies(TextWriter writer, string oldAssemblyPath, string newAssemblyPath, bool quickAndQuietMode)
+		private static IEnumerable<BreakingChange> CompareAssemblies(string oldAssemblyPath, string newAssemblyPath)
 		{
-			writer.WriteLine("Comparing:");
-			writer.WriteLine("Old: {0}".FormatInvariant(Path.GetFullPath(oldAssemblyPath)));
-			writer.WriteLine("New: {0}".FormatInvariant(Path.GetFullPath(newAssemblyPath)));
-
 			using (var oldAssembly = File.Open(oldAssemblyPath, FileMode.Open))
 			using (var newAssembly = File.Open(newAssemblyPath, FileMode.Open))
 			{
 				var changesBuilder = new AssemblyChangesBuilder();
 				AssemblyChanges changes = changesBuilder.GetChanges(oldAssembly, newAssembly);
-
+				
 				var breakingChangeVisitor = new BreakingChangeVisitor();
-				breakingChangeVisitor.Visit(changes);
+				changes.Visit(breakingChangeVisitor);
 
-				if (quickAndQuietMode)
-				{
-					if (breakingChangeVisitor.BreakingChanges.Any())
-					{
-						Environment.ExitCode = 1;
-						return;
-					}
-				}
-				else
-				{
-					List<BreakingChangeResult> breakingChangeResults = breakingChangeVisitor.BreakingChanges.ToList();
-
-					writer.WriteLine("Found {0} breaking changes".FormatInvariant(breakingChangeResults.Count));
-
-					// TODO: Use pretty printer visitor to display exact changes. Just dumping the enum name for now
-					foreach (var result in breakingChangeResults)
-					{
-						writer.WriteLine("\t-{0}".FormatInvariant(result.BreakType));
-					}
-				}
+				return breakingChangeVisitor.BreakingChanges;
 			}
 		}
 

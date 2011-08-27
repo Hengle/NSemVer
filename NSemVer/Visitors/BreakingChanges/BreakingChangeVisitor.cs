@@ -1,6 +1,5 @@
 ﻿namespace NSemVer.Visitors.BreakingChanges
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using NSemVer.Visitors.BreakingChanges.BreakingChangeDefinitions;
@@ -8,73 +7,110 @@
 
 	public class BreakingChangeVisitor : VisitorBase
 	{
-		private readonly IBreakingChangeDefinitionsProvider _breakingChangeDefinitionsProvider;
-		private readonly List<BreakingChangeResult> _breakingChanges = new List<BreakingChangeResult>();
+		private readonly BreakingChangeDefinitionsProvider _breakingChangeDefinitionsProvider;
+		private readonly List<BreakingChange> _breakingChanges = new List<BreakingChange>();
 
 		public BreakingChangeVisitor()
-			: this (new DefaultBreakingChangeDefinitionsProvider())
+			: this (new BreakingChangeDefinitionsProvider())
 		{
 		}
 
-		public BreakingChangeVisitor(IBreakingChangeDefinitionsProvider breakingChangeDefinitionsProvider)
+		public BreakingChangeVisitor(BreakingChangeDefinitionsProvider breakingChangeDefinitionsProvider)
 		{
 			_breakingChangeDefinitionsProvider = breakingChangeDefinitionsProvider;
 		}
 
-		public IEnumerable<BreakingChangeResult> BreakingChanges
+		public bool StopOnFirstBreakingChange { get; set; }
+
+		public IEnumerable<BreakingChange> BreakingChanges
 		{
 			get { return _breakingChanges; }
 		}
 
-		protected override void Visit(TypeChange typeChange, TypeChangeContext typeChangeContext)
+		protected override bool Visit(TypeChange typeChange, TypeChangeContext typeChangeContext)
 		{
-			if (0 == DetermineBreakingChanges(_breakingChangeDefinitionsProvider.BreakingTypeChanges, typeChange, typeChangeContext) &&
-				typeChange.ChangeType == ChangeType.Matched)
-			{
-				base.Visit(typeChange, typeChangeContext);
-			}
+			NextAction nextAction = Visit(_breakingChangeDefinitionsProvider.BreakingTypeChanges, typeChange, typeChange.ChangeType, typeChangeContext);
+			return nextAction == NextAction.VisitChildTypes
+			       	? base.Visit(typeChange, typeChangeContext)
+			       	: nextAction == NextAction.VisitNextSibling ? true : false;
 		}
 
-		protected override void Visit(MethodGroupChange methodGroupChange, MethodGroupChangeContext methodGroupChangeContext)
+		protected override bool Visit(MethodGroupChange methodGroupChange, MethodGroupChangeContext methodGroupChangeContext)
 		{
-			if (0 == DetermineBreakingChanges(_breakingChangeDefinitionsProvider.BreakingMethodGroupChanges, methodGroupChange, methodGroupChangeContext) &&
-				methodGroupChange.ChangeType == ChangeType.Matched)
-			{
-				base.Visit(methodGroupChange, methodGroupChangeContext);
-			}
+			NextAction nextAction = Visit(_breakingChangeDefinitionsProvider.BreakingMethodGroupChanges, methodGroupChange, methodGroupChange.ChangeType, methodGroupChangeContext);
+			return nextAction == NextAction.VisitChildTypes
+				? base.Visit(methodGroupChange, methodGroupChangeContext)
+				: nextAction == NextAction.VisitNextSibling ? true : false;
 		}
 
-		protected override void Visit(MethodChange methodChange, MethodChangeContext methodChangeContext)
+		protected override bool Visit(MethodChange methodChange, MethodChangeContext methodChangeContext)
 		{
-			if (0 == DetermineBreakingChanges(_breakingChangeDefinitionsProvider.BreakingMethodChanges, methodChange, methodChangeContext) &&
-				methodChange.ChangeType == ChangeType.Matched)
-			{
-				base.Visit(methodChange, methodChangeContext);
-			}
+			NextAction nextAction = Visit(_breakingChangeDefinitionsProvider.BreakingMethodChanges, methodChange, methodChange.ChangeType, methodChangeContext);
+			return nextAction == NextAction.VisitChildTypes
+				? base.Visit(methodChange, methodChangeContext)
+				: nextAction == NextAction.VisitNextSibling ? true : false;
 		}
 
-		protected override void Visit(ParameterChange parameterChange, ParameterChangeContext parameterChangeContext)
+		protected override bool Visit(ParameterChange parameterChange, ParameterChangeContext parameterChangeContext)
 		{
-			if (0 == DetermineBreakingChanges(_breakingChangeDefinitionsProvider.BreakingParameterChanges, parameterChange, parameterChangeContext) &&
-				parameterChange.ChangeType == ChangeType.Matched)
-			{
-				base.Visit(parameterChange, parameterChangeContext);
-			}
+			NextAction nextAction = Visit(_breakingChangeDefinitionsProvider.BreakingParameterChanges, parameterChange, parameterChange.ChangeType, parameterChangeContext);
+			return nextAction == NextAction.VisitChildTypes
+				? base.Visit(parameterChange, parameterChangeContext)
+				: nextAction == NextAction.VisitNextSibling ? true : false;
 		}
 
-		private int DetermineBreakingChanges<TChange, TChangeContext>(
-			IEnumerable<KeyValuePair<ApiBreakType, Func<TChange, TChangeContext, bool>>> breakingTypeChangeFuncs,
+		private NextAction Visit<TChange, TChangeContext>(
+			IBreakingChangeDefinitions<TChange, TChangeContext> breakingChangeDefinitions,
+			TChange typeChange,
+			ChangeType changeType,
+			TChangeContext typeChangeContext)
+		{
+			ChangesResult result = EvaluateAndStoreBreakingChanges(breakingChangeDefinitions, typeChange, typeChangeContext);
+
+			if (result == ChangesResult.NoBreakingChanges && changeType == ChangeType.Matched)
+			{
+				return NextAction.VisitChildTypes;
+			}
+
+			return (StopOnFirstBreakingChange && result == ChangesResult.SomeBreakingChanges)
+				? NextAction.Stop
+				: NextAction.VisitNextSibling;
+		}
+
+		private ChangesResult EvaluateAndStoreBreakingChanges<TChange, TChangeContext>(
+			IBreakingChangeDefinitions<TChange, TChangeContext> breakingChangeDefinitions,
 			TChange change,
-			TChangeContext context)
+			TChangeContext changeContext)
 		{
-			var breakingChanges = breakingTypeChangeFuncs
-				.Where(breakingTypeChangeFunc => breakingTypeChangeFunc.Value(change, context))
-				.Select(keyValuePair => new BreakingChangeResult(keyValuePair.Key, change))
-				.ToList();
+			var breakingChanges = breakingChangeDefinitions.GetBreakingChanges(change, changeContext);
+
+			if (StopOnFirstBreakingChange)
+			{
+				var breakingChange = breakingChanges.FirstOrDefault();
+				if (breakingChange != null)
+				{
+					_breakingChanges.Add(breakingChange);
+					return ChangesResult.SomeBreakingChanges;
+				}
+
+				return ChangesResult.NoBreakingChanges;
+			}
 
 			_breakingChanges.AddRange(breakingChanges);
+			return breakingChanges.Any() ? ChangesResult.SomeBreakingChanges : ChangesResult.NoBreakingChanges;
+		}
 
-			return breakingChanges.Count;
+		private enum ChangesResult
+		{
+			NoBreakingChanges,
+			SomeBreakingChanges
+		}
+
+		private enum NextAction
+		{
+			VisitChildTypes,
+			VisitNextSibling,
+			Stop
 		}
 	}
 }

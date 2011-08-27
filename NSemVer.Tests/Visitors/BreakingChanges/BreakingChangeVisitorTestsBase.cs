@@ -2,7 +2,6 @@
 {
 	using System.CodeDom.Compiler;
 	using System.Linq;
-	using NSemVer.Visitors;
 	using NSemVer.Visitors.BreakingChanges;
 	using NSemVer.Visitors.BreakingChanges.BreakingChangeDefinitions;
 	using NUnit.Framework;
@@ -10,7 +9,7 @@
 
 	public class BreakingChangeVisitorTestsBase : NSemVerTestBase
 	{
-		private BreakingChangeResult[] _breakingChanges;
+		private BreakingChange[] _breakingChanges;
 
 		protected BreakingChangeVisitor Sut { get; set; }
 
@@ -22,10 +21,10 @@
 
 		protected void BreakingChangeVisitor()
 		{
-			BreakingChangeVisitor(new DefaultBreakingChangeDefinitionsProvider());
+			BreakingChangeVisitor(new BreakingChangeDefinitionsProvider());
 		}
 
-		protected void BreakingChangeVisitor(IBreakingChangeDefinitionsProvider breakingChangeDefinitionsProvider)
+		protected void BreakingChangeVisitor(BreakingChangeDefinitionsProvider breakingChangeDefinitionsProvider)
 		{
 			Sut = new BreakingChangeVisitor(breakingChangeDefinitionsProvider);
 		}
