@@ -46,7 +46,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChangeBuilderExtensions.cs" />
     <Compile Include="Visitors\BreakingChanges\BreakingChange.cs" />
     <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\BreakingChangeDefinitionsBase.cs" />
     <Compile Include="Visitors\BreakingChanges\BreakingChangeDefinitions\BreakingChangeDefinitionsProvider.cs" />
