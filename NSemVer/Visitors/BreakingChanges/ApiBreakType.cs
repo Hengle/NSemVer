@@ -6,6 +6,7 @@
 		MethodOverloadedWithInterfaceBasedParameter,
 		MethodReturnTypeChanged,
 		InstanceMethodAdded,
-		InstanceMethodRemoved
+		InstanceMethodRemoved,
+		ImplicitConversionOperatorOverloadAdded
 	}
 }

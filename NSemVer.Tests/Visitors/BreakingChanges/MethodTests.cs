@@ -1,5 +1,6 @@
 namespace NSemVer.Tests.Visitors.BreakingChanges
 {
+	using System;
 	using System.Reflection;
 	using NSemVer.Visitors.BreakingChanges;
 	using NUnit.Framework;
@@ -327,6 +328,76 @@ namespace NSemVer.Tests.Visitors.BreakingChanges
 					.And(BreakingChangeVisitorVisitsChanges)
 					.Then(NoBreakingChanges)
 					.ExecuteWithReport();
+			}
+		}
+
+		public class ImplicitConversionOperatorOverloadTests : BreakingChangeVisitorTestsBase
+		{
+			private readonly string _previousCode;
+			private readonly string _currentCode;
+			private readonly string _brokenConsumerCode;
+
+			public ImplicitConversionOperatorOverloadTests()
+			{
+				_previousCode = @"
+					namespace Api
+					{
+						using System;
+
+						<class-visibility> class Foo
+						{
+							<method-visibility> static implicit operator int ();
+						}
+					}";
+
+				_currentCode = @"
+					namespace Api
+					{
+						using System;
+
+						<class-visibility> class Foo
+						{
+							<method-visibility> static implicit operator int ();
+							<method-visibility> static implicit operator float ();
+						}
+					}";
+
+				_brokenConsumerCode = @"
+					namespace ApiConsumer
+					{
+						using Api;
+						using System;
+
+						public class Consumer
+						{
+							void Bar(int x) { }
+							void Bar(float x) { }
+
+							public void Example()
+							{
+								Bar(new Foo());
+							}
+						}
+					}
+				";
+			}
+
+			[Ignore("TODO")]
+			[Test]
+			public void AddingPublicImplicitConversionOperatorOverload()
+			{
+				string previousCode = _previousCode.Replace("<class-visibility>", "public").Replace("<method-visibility>", "public");
+				string currentCode = _currentCode.Replace("<class-visibility>", "public").Replace("<method-visibility>", "public");
+
+				GivenContext(previousCode, currentCode, GenerateScenarioName(MethodBase.GetCurrentMethod()))
+					.When(ApiChangesDetermined)
+					.And(BreakingChangeVisitorVisitsChanges)
+					.Then(BreakingChangeCountIs, 1)
+					.And(BreakingMethodOverloadChangeDetected, ApiBreakType.ImplicitConversionOperatorOverloadAdded, "????")
+					// .And(ExampleBrokenConsumerCodeIs, _brokenConsumerCode, "error CS1061: 'Api.Foo' does not contain a definition for 'Bar' and no extension method 'Bar' accepting a first argument of type 'Api.Foo' could be found")
+					.ExecuteWithReport();
+
+				throw new NotImplementedException();
 			}
 		}
 	}
