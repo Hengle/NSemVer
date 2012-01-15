@@ -27,36 +27,36 @@
 			get { return _breakingChanges; }
 		}
 
-		protected override bool Visit(TypeChange typeChange, TypeChangeContext typeChangeContext)
+		protected override VisitResult Visit(TypeChange typeChange, TypeChangeContext typeChangeContext)
 		{
 			NextAction nextAction = Visit(_breakingChangeDefinitionsProvider.BreakingTypeChanges, typeChange, typeChange.ChangeType, typeChangeContext);
 			return nextAction == NextAction.VisitChildTypes
 			       	? base.Visit(typeChange, typeChangeContext)
-			       	: nextAction == NextAction.VisitNextSibling ? true : false;
+			       	: nextAction == NextAction.VisitNextSibling ? VisitResult.Continue : VisitResult.Stop;
 		}
 
-		protected override bool Visit(MethodGroupChange methodGroupChange, MethodGroupChangeContext methodGroupChangeContext)
+		protected override VisitResult Visit(MethodGroupChange methodGroupChange, MethodGroupChangeContext methodGroupChangeContext)
 		{
 			NextAction nextAction = Visit(_breakingChangeDefinitionsProvider.BreakingMethodGroupChanges, methodGroupChange, methodGroupChange.ChangeType, methodGroupChangeContext);
 			return nextAction == NextAction.VisitChildTypes
 				? base.Visit(methodGroupChange, methodGroupChangeContext)
-				: nextAction == NextAction.VisitNextSibling ? true : false;
+				: nextAction == NextAction.VisitNextSibling ? VisitResult.Continue : VisitResult.Stop;
 		}
 
-		protected override bool Visit(MethodChange methodChange, MethodChangeContext methodChangeContext)
+		protected override VisitResult Visit(MethodChange methodChange, MethodChangeContext methodChangeContext)
 		{
 			NextAction nextAction = Visit(_breakingChangeDefinitionsProvider.BreakingMethodChanges, methodChange, methodChange.ChangeType, methodChangeContext);
 			return nextAction == NextAction.VisitChildTypes
 				? base.Visit(methodChange, methodChangeContext)
-				: nextAction == NextAction.VisitNextSibling ? true : false;
+				: nextAction == NextAction.VisitNextSibling ? VisitResult.Continue : VisitResult.Stop;
 		}
 
-		protected override bool Visit(ParameterChange parameterChange, ParameterChangeContext parameterChangeContext)
+		protected override VisitResult Visit(ParameterChange parameterChange, ParameterChangeContext parameterChangeContext)
 		{
 			NextAction nextAction = Visit(_breakingChangeDefinitionsProvider.BreakingParameterChanges, parameterChange, parameterChange.ChangeType, parameterChangeContext);
 			return nextAction == NextAction.VisitChildTypes
 				? base.Visit(parameterChange, parameterChangeContext)
-				: nextAction == NextAction.VisitNextSibling ? true : false;
+				: nextAction == NextAction.VisitNextSibling ? VisitResult.Continue : VisitResult.Stop;
 		}
 
 		private NextAction Visit<TChange, TChangeContext>(
