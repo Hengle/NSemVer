@@ -4,6 +4,5 @@
 
 	public class BreakingMethodChanges : BreakingChangeDefinitionsBase<MethodChange, MethodChangeContext>
 	{
-		// TODO
 	}
 }
