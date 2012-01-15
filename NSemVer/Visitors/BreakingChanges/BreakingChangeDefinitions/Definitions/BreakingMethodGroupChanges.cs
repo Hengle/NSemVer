@@ -1,4 +1,4 @@
-﻿namespace NSemVer.Visitors.BreakingChanges.BreakingChangeDefinitions.Impl
+﻿namespace NSemVer.Visitors.BreakingChanges.BreakingChangeDefinitions.Definitions
 {
 	using System.Linq;
 	using Mono.Cecil;

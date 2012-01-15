@@ -1,6 +1,6 @@
 ﻿namespace NSemVer.Visitors.BreakingChanges.BreakingChangeDefinitions
 {
-	using NSemVer.Visitors.BreakingChanges.BreakingChangeDefinitions.Impl;
+	using NSemVer.Visitors.BreakingChanges.BreakingChangeDefinitions.Definitions;
 	using NSemVer.Visitors.Context;
 
 	public class BreakingChangeDefinitionsProvider
