@@ -16,7 +16,7 @@ namespace NSemVer
 
 		public static void Visit(this AssemblyChanges changes, params IChangeVisitor[] visitors)
 		{
-			foreach (var changeVisitor in visitors)
+			foreach (IChangeVisitor changeVisitor in visitors)
 			{
 				changeVisitor.Visit(changes);
 			}

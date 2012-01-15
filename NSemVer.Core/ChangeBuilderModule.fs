@@ -11,6 +11,7 @@ let createMethodChange (c:ChangeType) (m:MethodDefinition) =
     { Method = m; PreviousMethod = Unchecked.defaultof<MethodDefinition>; ChangeType = c; ParameterChanges = m.Parameters |> Seq.map (createParameterChange c) }
 
 let createMethodGroups (t:TypeDefinition) = t.Methods |> Seq.groupBy (fun x -> x.Name)
+
 let createMethodGroupChange (c:ChangeType) (grp:string * seq<MethodDefinition>) =
     { MethodName = (fst grp); ChangeType = c; MethodChanges = (snd grp) |> Seq.map (createMethodChange c) }
 

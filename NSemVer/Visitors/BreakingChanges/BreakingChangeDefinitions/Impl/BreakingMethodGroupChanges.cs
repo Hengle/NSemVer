@@ -8,6 +8,8 @@
 	{
 		public BreakingMethodGroupChanges()
 		{
+			// TODO: Still a bit hard on the eyes. use fluent builder?
+
 			Add(ApiBreakType.InstanceMethodAdded,
 				(methodGroupChange, ctx) => methodGroupChange
 				                            	.GetAllMethodChangesOfType(ChangeType.Added)
