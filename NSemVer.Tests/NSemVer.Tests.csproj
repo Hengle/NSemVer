@@ -78,7 +78,6 @@
     <Compile Include="Visitors\BreakingChanges\ClassTests.cs" />
     <Compile Include="Visitors\BreakingChanges\BreakingChangeVisitorTestsBase.cs" />
     <Compile Include="Visitors\BreakingChanges\MethodTests.cs" />
-    <Compile Include="Visitors\BreakingChanges\ScratchPad.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
