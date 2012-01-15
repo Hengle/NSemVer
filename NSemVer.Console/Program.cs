@@ -21,9 +21,11 @@
 				if (!VerifyFileExists(oldAssemblyPath) || !VerifyFileExists(newAssemblyPath))
 					return;
 
+				Console.WriteLine();
 				Console.WriteLine("Comparing:");
 				Console.WriteLine("Old: {0}".FormatInvariant(Path.GetFullPath(oldAssemblyPath)));
 				Console.WriteLine("New: {0}".FormatInvariant(Path.GetFullPath(newAssemblyPath)));
+				Console.WriteLine();
 
 				var breakingChanges = CompareAssemblies(oldAssemblyPath, newAssemblyPath);
 
@@ -49,7 +51,14 @@
 
 						Console.WriteLine();
 					}
+					else
+					{
+						Console.WriteLine("No breaking changes found");
+					}
 				}
+
+				Console.WriteLine();
+
 				return;
 			}
 			catch (CommandLineException exception)
